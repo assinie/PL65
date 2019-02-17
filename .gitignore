@@ -1,0 +1,8 @@
+# Distribution / packaging
+build/
+roms/
+
+# Temporary
+*~
+tmp/
+test/
