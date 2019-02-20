@@ -5487,7 +5487,7 @@ HC265:
 				BRK;
 				CALL HB1C9; "STRING 'OF';"; DATA 'O', $C6;
 				BRK;
-				CALL HB21E; "STRING 'ORA ';"; DATA 'ORA', $A0;
+				CALL HB225; "STRING 'ORA ';"; DATA 'ORA', $A0;
 				CALL HC441;
 				BRK;
 				CALL HB119;

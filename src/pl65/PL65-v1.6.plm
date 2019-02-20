@@ -120,7 +120,7 @@ DEF HF8BC = $F8BC;
 
 	IFF .A ^= $0D THEN HB03C;
 
-	".A = '2';"; 'LDA #"2"';
+	.A = '2';
 
 HB03C:
 	CALL HEA7D;
@@ -129,7 +129,7 @@ HB03C:
 
 HB044:
 	CALL HB072;
-	".A = $0D;"; 'LDA #$0D';  CALL HE9BC;
+	.A = $0D;  CALL HE9BC;
 	CALL HE50A;
 	CALL HE8FE;
 
@@ -137,7 +137,7 @@ HB044:
 	Z06 =## HB93C;
 
 	CALL HB909;
-	".A = Z0D;"; 'LDA Z0D';
+	.A = Z0D;
 	CALL HEA46;
 	CALL HE9F0;
 	GOTO HE1A1;
@@ -251,8 +251,7 @@ HB119:
 	FOR Z10 = 0 TO Z08
 	DO;
 		"Z00 = H0400[Z10];";  "Remplacer LDA Z10/TAX par LDX Z10";
-		".X=Z10; Z00 = H0400[.X];"; "Version optimisee";
-		'LDX Z10'; 'LDA H0400,X'; 'STA Z00';
+		.X=Z10; Z00 = H0400[.X]; "Version optimisee";
 
 		"Remplacer BNE *+5/JMP ZZnnnn par BEQ ZZnnnn (HB18E)";
 		"Ou mettre: .A=Z1F; IFF .A=1 THEN HB18E;";
@@ -263,11 +262,10 @@ HB119:
 			"Ou mettre: .A=Z00, IFF .A^=$20 THEN HB18E;";
 			IF $20 = Z00 THEN
 			DO;
-				".Y = Z10;"; 'LDY Z10';
-				"INC .Y;"; 'INY';
+				.Y = Z10;
+				INC .Y;
 
-				".A = H0400[.Y];";
-				'LDA H0400,Y';
+				.A = H0400[.Y];
 
 				IFF .A  = '-' THEN HB178;
 				IFF .A  = '=' THEN HB178;
@@ -281,7 +279,7 @@ HB119:
 				HB17B:
 				IFF .A ^= $20 THEN HB18E;
 
-				".A = $5A;"; 'LDA #$5A';
+				.A = $5A;
 				IFF  .A ^= H0400 THEN HB18E;
 				IFF  .A ^= H0401 THEN HB18E;
 
@@ -289,7 +287,7 @@ HB119:
 			END;
 		END;
 		HB18E:
-	       ".A = Z00;"; 'LDA Z00'; CALL HE9BC;
+	       .A = Z00; CALL HE9BC;
 	END;
 
 
@@ -836,38 +834,32 @@ HB119:
 	CALL HB88F;
 
 	"Boucle H014B.6 = H0450; modifiée";
-	".X = 0;"; 'LDX #$00';
-	".Y = Z01;"; 'LDY Z01';
+	.X = 0;
+	.Y = Z01;
  HB618:
-	".A = H0450[.Y];"; 'LDA H0450,Y';
+	.A = H0450[.Y];
 	IFF .A = ';' THEN HB62E;
 	IFF .A = '/' THEN HB62E;
 	'STA H014B,X';
-	"INC .X;"; 'INX';
-	"INC .Y;"; 'INY';
+	INC .X;
+	INC .Y;
 	IFF .Y ^= 6 THEN HB618;
 	IFF .Z THEN HB638;
 
  HB62E:
-	".A = ' ';"; 'LDA #" "';
+	.A = ' ';
 	'STA H014B,X';
-	"INC .X;"; 'INX';
+	INC .X;
 	IFF .X ^= 6 THEN HB62E;
 
  HB638:
 	Z01 = .Y;
-	".A = H0450[.Y];"; 'LDA H0450,Y';
+	.A = H0450[.Y];
 	IFF .A ^= '/' THEN HB64E;
 
-	"H0158 = H0451[.Y] - '0';";
-*
-	LDA H0451,Y
-	SEC
-	SBC #'0'
-	STA H0158
-*
-	"INC .Y;"; 'INY';
-	"INC .Y"; 'INY';
+	H0158 = H0451[.Y] - '0';
+	INC .Y;
+	INC .Y;
 	Z01 = .Y;
 
  HB64E:
@@ -878,20 +870,20 @@ HB119:
 " -----------------------------------------------------------------------------";
  HB651:
 	CALL HB88F;
-	".A = $0D;"; 'LDA #$0D'; CALL HEF02;
-	".Y = 0;"; 'LDY #$00';
-	".X = Z01;"; 'LDX Z01';
+	.A = $0D; CALL HEF02;
+	.Y = 0;
+	.X = Z01;
 
  HB65D:
-	".A = H0450[.X];"; 'LDA H0450,X';
-	"INC .X;"; 'INX';
+	.A = H0450[.X];
+	INC .X;
 	IFF .A ^= ';' THEN HB668;
-	"DEC .X;"; 'DEX';
-	".A = ' ';"; 'LDA #" "';
+	DEC .X;
+	.A = ' ';
  HB668:
 	'STA HA42E,Y';
 	CALL HEF02;
-	"INC .Y;"; 'INY';
+	INC .Y;
 	IFF .Y ^= 5 THEN HB65D;
 
 	Z01 = .X;
@@ -953,20 +945,22 @@ HB119:
  HB6B3:
 	SET .D;
 	Z0B = Z0B+1;
-	".A = Z0A;"; 'LDA Z0A';
+	.A = Z0A;
 	'ADC #$00';
 	Z0A = .A;
 	CLR .D;
 
 	CALL HB6D3;
-	"Z14 <- .XA;";
-	Z14 = .X;
-	Z15 = .A;
 
-	".A = Z0B;"; 'LDA Z0B'; CALL HB6D3;
-	"Z16 <- .XA;";
-	Z16 = .X;
-	Z17 = .A;
+	Z14 <- .XA;
+	"Z14 = .X;";
+	"Z15 = .A;";
+
+	.A = Z0B; CALL HB6D3;
+
+	Z16 <- .XA;
+	"Z16 = .X;";
+	"Z17 = .A;";
 	RETURN;
 
 
@@ -979,14 +973,14 @@ HB119:
 "	ACC: Unité";
 " -----------------------------------------------------------------------------";
  HB6D3:
-	"STACK .A;"; 'PHA';
-	"SHR A;"; 'LSR';
-	"SHR A;"; 'LSR';
-	"SHR A;"; 'LSR';
-	"SHR A;"; 'LSR';
+	STACK .A;
+	SHR A; "'LSR';";
+	SHR A; "'LSR';";
+	SHR A; "'LSR';";
+	SHR A; "'LSR';";
 	'ORA #"0"';
-	".X = .A"; 'TAX';
-	"UNSTACK .A;"; 'PLA';
+	.X = .A;
+	UNSTACK .A;
 	'ORA #$F0';
 	'AND #$3F';
 	RETURN;
@@ -998,12 +992,12 @@ HB119:
 " Si V=1 et Z04>0 => retour à l'appelant de la routine contenant le BRK";
 " -----------------------------------------------------------------------------";
  HB6E1:
-	"UNSTACK .P;"; 'PLP';
+	UNSTACK .P;
 
 	IF .O THEN
 	DO;
-		"UNSTACK .A;"; 'PLA';
-		"UNSTACK .A;"; 'PLA';
+		UNSTACK .A;
+		UNSTACK .A;
 
 		Z03 = 0;
 
@@ -1067,7 +1061,7 @@ HB119:
 
  HB765:
 	CALL HEB44;
-	".A = ';';"; 'LDA #";"'; GOTO HE9BC;
+	.A = ';'; GOTO HE9BC;
 
 
 " -----------------------------------------------------------------------------";
@@ -1133,23 +1127,23 @@ HB119:
 " En fonction du point d'entrée charge A,X,Y avec 0,1,2 ou 3";
 " -----------------------------------------------------------------------------";
  HB82D:
-	".Y = 0;"; 'LDY #$00'; IFF .Z THEN HB83B;
+	.Y = 0; IFF .Z THEN HB83B;
 
  HB831:
-	".Y = 1;"; 'LDY #$01'; IFF ^.Z THEN HB83B;
+	.Y = 1; IFF ^.Z THEN HB83B;
 
  HB835:
-	".Y = 2;"; 'LDY #$02'; IFF ^.Z THEN HB83B;
+	.Y = 2; IFF ^.Z THEN HB83B;
 
  HB839:
-	".Y = 3;"; 'LDY #$03';
+	.Y = 3;
 
  HB83B:
-	".X = 1;"; 'LDX #$01';
+	.X = 1;
 	HA40E = .X;
 	HA404 =## HE154;
-	".A = .Y;"; 'TYA';
-	".X = .A;"; 'TAX';
+	.A = .Y;
+	.X = .A;
 	GOTO HB92E;
 
 
@@ -1188,7 +1182,7 @@ HB119:
 " Place le premier caractère de la chaine en Z00 et incrémente le flag Z1E si c'est le dernier (renvoie Z00=0 si Z1E<>0 avant l'appel)";
 
  HB875:
-	".A = Z1E;"; 'LDA Z1E';
+	.A = Z1E;
 	IF ^.Z THEN
 	DO;
 		Z00 = 0;
@@ -1199,8 +1193,8 @@ HB119:
 HB882:
 	"Les 2 instructions suivantes sont équivalentes";
 	" a: .A = &Z0E qui n'est pas encore pris en compte...";
-	".X = 0;"; 'LDX #$00';
-	".A = @Z0E[.X];"; 'LDA (Z0E,X)';
+	.X = 0;
+	.A = @Z0E[.X];
 
 	IF - THEN INC Z1E;
 	'AND #$7F';
@@ -1306,14 +1300,14 @@ HB882:
 " Output (Z06-Z07) null terminated string";
 " -----------------------------------------------------------------------------";
  HB909:
-	".Y = 0;"; 'LDY #$00';
+	.Y = 0;
 
  HB90B:
-	".A = @Z06[.Y]"; 'LDA (Z06),Y';
+	.A = @Z06[.Y];
 	IF ^= THEN
 	BEGIN;
 		CALL HE97A;
-		"INC .Y;"; 'INY';
+		INC .Y;
 		IFF ^= THEN HB90B;
 	END;
 
@@ -1353,8 +1347,8 @@ HB882:
 " CR/LF";
 " -----------------------------------------------------------------------------";
  HB932:
-	".A = $0D;"; 'LDA #$0D'; CALL HE9BC;
-	".A = $0A;"; 'LDA #$0A'; GOTO HE9BC;
+	.A = $0D; CALL HE9BC;
+	.A = $0A; GOTO HE9BC;
 
 
 " -----------------------------------------------------------------------------";
@@ -1509,6 +1503,11 @@ HB882:
 
 
 " Identifiant";
+"HB9FB:";
+	GOTO RegReg_Patch;
+	"IF ^.O THEN RETURN;";
+
+ HB9FE:
 	CALL HB375;
 	IF ^.O THEN
 	DO;
@@ -2123,7 +2122,83 @@ HBC44:
 	CALL HB1C9; STRING '<-';
 	IF ^.O THEN
 	DO;
+		"CALL HCEC4;";
+
+	"-----------------------------------------------------------------------------";
+	" Patch: ";
+	"id <- .AX;";
+	"id <- .AY;";
+	"id <- .XA;";
+	"id <- .YA;";
+	"id <- .XY;";
+	"id <- .YX;";
+	"-----------------------------------------------------------------------------";
 		CALL HCEC4;
+	 AX_:
+		CALL HREGAX;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF53;
+			IFF ^.O THEN YX_X;
+		END;
+
+	 AY_:
+		CALL HREGAY;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF53;
+	 AY_Y:
+			CALL HB577;
+			CALL HCF78;
+			CALL OUT_STY;
+			IFF ^.O THEN Store_End;
+		END;
+
+	 XA_:
+		CALL HREGXA;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STX;
+	 XA_A:
+			CALL HB577;
+			CALL HCF78;
+			CALL HCF53;
+			IFF ^.O THEN Store_End;
+		END;
+
+	 XY_:
+		CALL HREGXY;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STX;
+			IFF ^.O THEN AY_Y;
+		END;
+
+	 YA_:
+		CALL HREGYA;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STY;
+			IFF ^.O THEN XA_A;
+		END;
+
+	 YX_:
+		CALL HREGYX;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STY;
+	 YX_X:
+			CALL HB577;
+			CALL HCF78;
+			CALL OUT_STX;
+	 Store_End:
+		GOTO HCEDB;
+		END;
+
+	 Store_Suite:
+		CLEAR .O;
+	"-----------------------------------------------------------------------------";
+
 		CALL HC9BD;
 		BRK;
 		CALL HCF17;
@@ -3640,6 +3715,40 @@ HC265:
 	CALL HB1C9; STRING 'INC ';
 	IF ^.O THEN
 	BEGIN;
+		"Patch pour INC .reg";
+		" [--- ";
+		"INC .A;";
+		CALL HREGA;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'SEC';
+			CALL HB21E; STRING 'ADC #0';
+			RETURN;
+		END;
+
+		"INC .X;";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			OUT_INX:
+			CALL HB21E; STRING 'INX';
+			RETURN;
+		END;
+
+		"INC .Y;";
+		CALL HREGY;
+		IF ^.O THEN
+		BEGIN;
+			OUT_INY:
+			CALL HB21E; STRING 'INY';
+			RETURN;
+		END;
+
+		"Retour a la routine d'origine";
+		CLR .O;
+		" ---]";
+
+		" INC id";
 		CALL HB375;
 		BRK;
 		CALL HCF07;
@@ -3651,6 +3760,41 @@ HC265:
 	CALL HB1C9; STRING 'DEC ';
 	IF ^.O THEN
 	BEGIN;
+
+		"Patch pour INC .reg";
+		" [--- ";
+		"DEC .A;";
+		CALL HREGA;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'CLC';
+			CALL HB21E; STRING 'SBC #0';
+			RETURN;
+		END;
+
+		"DEC .X;";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			OUT_DEX:
+			CALL HB21E; STRING 'DEX';
+			RETURN;
+		END;
+
+		"DEC .Y;";
+		CALL HREGY;
+		IF ^.O THEN
+		BEGIN;
+			OUT_DEY:
+			CALL HB21E; STRING 'DEY';
+			RETURN;
+		END;
+
+		"Retour a la routine d'origine";
+		CLR .O;
+		" ---]";
+
+		" DEC id";
 		CALL HB375;
 		BRK;
 		CALL HCEFF;
@@ -4600,6 +4744,8 @@ HC265:
 		CALL HB21E; STRING 'R3=R2+1';
 		CALL HB21E; STRING 'CLD';
 		CALL HB21E; STRING 'LDX #$FF';
+
+	HCC0D:
 		CALL HB21E; STRING 'TXS';
 	END;
 
@@ -4654,17 +4800,52 @@ HC265:
 	END;
 
 	"PHA pour un octet seulement";
-	CLR .O;
-	CALL HCF17;
-	CALL HC480; BRK;
+
+	"STACK .A;";
+	CALL HREGA;
+	IF .O THEN
+	BEGIN;
+		"STACK .P;";
+		CALL HREGP;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'PHP';
+			RETURN;
+		END;
+		ELSE
+		BEGIN;
+			"STACK .X;";
+			CALL HREGX;
+			IF ^.O THEN
+			BEGIN;
+				CALL OUT_TXA;
+			END;
+			ELSE
+			BEGIN;
+				"STACK .Y;";
+				CALL HREGY;
+				IF ^.O THEN
+				BEGIN;
+					CALL OUT_TYA;
+				END;
+
+				ELSE
+				BEGIN;
+					" STACK id";
+					CLR .O;
+					CALL HCF17;
+					CALL HC480;
+				END;
+			END;
+		END;
+	END;
+	BRK;
 	CALL HB21E; STRING 'PHA';
+
 	RETURN;
 
 
 
-" Génération du code pour 'STACK <id>' | 'STACK WORD <id>'";
-
-" PHA pour un octet seulement";
 " =============================================================================";
 " Traitement des instructions:";
 
@@ -4742,10 +4923,39 @@ HC265:
 	CALL HB1C9; STRING '[';
 	IF ^.O THEN
 	DO;
-		CALL HC142;
+		" [.X]";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB57E;
+			CALL HCF93;
+			CALL HB468; STRING ',X';
+			CALL HCFA0;
+		END;
+
+		ELSE
+		BEGIN;
+			" [.Y]";
+			CALL HREGY;
+			IF ^.O THEN
+			BEGIN;
+				CALL HB57E;
+				CALL HCF93;
+				CALL HB468; STRING ',Y';
+				CALL HCFA0;
+			END;
+
+			ELSE
+			BEGIN;
+				" [exp]";
+				CALL HC142;
+			END;
+		END;
+
 		BRK;
 		CALL HB1C9; STRING ']';
 		BRK;
+
 	END;
 	RETURN;
 
@@ -4882,19 +5092,56 @@ HC265:
 		RETURN;
 	END;
 
-	"UNSTACK <id>";
-	CLR .O;
+	"PLA pour un octet seulement";
+	"CLR .O;";
+
+	"UNSTACK .P;";
+	CALL HREGP;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB21E; STRING 'PLP';
+		RETURN;
+	END;
+
+	" Dans tous les autres cas il faut faire un PLA";
 	CALL HB21E; STRING 'PLA';
-	CALL HCF53;
-	CALL HC441; BRK;
-	CALL HB119;
+
+	"UNSTACK .A;";
+	" Possibilité de gagner 1 octet en déplaçant ce test au niveau"
+	" de UNSTACK id>";
+	CALL HREGA;
+	IF ^.O THEN RETURN;
+
+	"UNSTACK .X;";
+	CALL HREGX;
+	IF ^.O THEN
+	BEGIN;
+		OUT_TAX:
+		CALL HB21E; STRING 'TAX';
+		RETURN;
+	END;
+
+	"UNSTACK .Y;";
+	CALL HREGY;
+	IF ^.O THEN
+	BEGIN;
+		OUT_TAY:
+		CALL HB21E; STRING 'TAY';
+		RETURN;
+	END;
+
+	"CALL HREGA;";
+	"IF .O THEN";
+	DO;
+		" UNSTACK <id>";
+		CLR .O;
+		CALL HCF53;
+		CALL HC441; BRK;
+		CALL HB119;
+	END;
 	RETURN;
 
 
-
-" Génération du code pour 'UNSTACK' <id> | 'UNSTACK' 'WORD' <id>";
-
-" Ici: 'UNSTACK' <id>";
 " -----------------------------------------------------------------------------";
 "				Instruction 'WHILE'";
 " -----------------------------------------------------------------------------";
@@ -5543,7 +5790,7 @@ SET_Cmd:
 		CALL HREGX;
 		IF ^.O THEN
 		BEGIN;
-			CALL HB225; STRING 'LDX ';
+			CALL OUT_LDX;
 			GOTO AREGFF;
 		END;
 
@@ -5551,7 +5798,7 @@ SET_Cmd:
 		CALL HREGY;
 		IF ^.O THEN
 		BEGIN;
-			CALL HB225; STRING 'LDY ';
+			CALL OUT_LDY;
 			GOTO AREGFF;
 		END;
 
@@ -5798,20 +6045,20 @@ STRING_Cmd:
 
 		'.ifdef STRING_CHAR';
 		CALL HB225; STRING ', ''';
-		".X = Z02;"; 'LDX Z02';
-		"Z00 = H0200[.X];"; 'LDA H0200,X'; 'STA Z00';
+		.X = Z02;
+		Z00 = H0200[.X];
 		CALL HB8F5;
 		CALL HB225; STRING '''''+$80';
 
 		'.else';
 		CALL HB225; STRING ',$';
-		".X = Z02;"; 'LDX Z02';
+		.X = Z02;
 		'LDA H0200,X';
 		'ORA #$80';
 		CALL HexToASCII;
-		"STACK .A;"; 'PHA';
+		STACK .A;
 		Z00 = .X; CALL HB8F5;
-		"UNSTACK .A:"; 'PLA';
+		UNSTACK .A;
 		Z00 =.A; CALL HB8F5;
 		'.endif';
 
@@ -5846,14 +6093,14 @@ id_reg_Patch:
 		CALL HREGX;
 		IF ^.O THEN
 		BEGIN;
-			CALL HB225; STRING 'STX ';
+			CALL OUT_STX;
 			IFF ^.O THEN EXITOK;
 		END;
 
 		CALL HREGY;
 		IF ^.O THEN
 		BEGIN;
-			CALL HB225; STRING 'STY ';
+			CALL OUT_STY;
  EXITOK:
 			CALL HCEE2;
 			GOTO HBA4E;
@@ -5935,6 +6182,323 @@ IF_BIT:
 	CALL HCCE1;
 	GOTO HBDFE;
 
+
+" -----------------------------------------------------------------------------";
+"			Instruction '.reg = .reg|val' ";
+"			'.A = @id[.reg]|@val[.reg]|id[.reg]' (patch) ";
+"			'.regs <- id' ";
+"			'.regs =## id' ";
+" -----------------------------------------------------------------------------";
+
+" PY65: c.onecmd('assemble b9fb jmp %RegReg_Patch%') ";
+
+" -----------------------------------------------------------------------------";
+"Patch .reg = .reg|val ";
+
+RegReg_Patch:
+
+	CALL To_Regs;
+	IF ^.O THEN GOTO HBA4E; "CALL HB1C9; STRING ';'; BRK; BRK; RETURN;";
+
+".X=";
+	CALL HREGX;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB1C9; STRING '+';
+		IF ^.O THEN
+		BEGIN;
+			";	JSR HCEC4		; Set Z04 := $FF";
+			" Token '1;'?";
+			CALL HCE9A;
+			IFF .O THEN Erreur;
+			GOTO OUT_INX;
+		END;
+
+		"X_DEC";
+			CALL HB1C9; STRING '-';
+			IF ^.O THEN
+			BEGIN;
+				";	JSR HCEC4		; Set Z04 := $FF";
+				" Token '1;'?";
+				CALL HCE9A;
+				IFF .O THEN Erreur;
+				GOTO OUT_DEX;
+
+			END;
+
+		"X_EQ";
+			CALL HEQUAL;
+			BRK;
+			"TAX_";
+			" .X = .A?";
+			CALL HREGA;
+			IF ^.O THEN
+			BEGIN;
+				;
+				CALL OUT_TAX;
+				"; Ou";
+				";	CALL HB21E		; OUT 'TAX'";
+				";	STRING 'TAX';";
+				IFF ^.O THEN  reg_ok;
+			END;
+
+		"TSX_";
+			".X = .S?";
+			CALL HREGS;
+			IF ^.O THEN
+			BEGIN;
+				"OUT 'TXS'";
+				CALL HCC0D;
+				"; Ou";
+				";	CALL HB21E;";
+				";	STRING 'TSX';";
+				IFF ^.O THEN reg_ok;
+			END;
+
+		"X_value";
+			".X = val?";
+			"OUT2 'LDX ';";
+			CALL OUT_LDX;
+			IFF ^.O THEN reg_value;
+
+	END;
+
+".Y=";
+	CALL HREGY;
+	IF ^.O THEN
+	DO;
+		CALL HB1C9; STRING '+';
+
+		IF ^.O THEN
+		BEGIN;
+			"CALL HCEC4		; Set Z04 := $FF";
+			"Token '1;'?";
+			CALL HCE9A;
+			IFF .O THEN Erreur;
+			"Trop loin pour un BVC OUT_INY :(";
+			GOTO OUT_INY;
+		END;
+
+		"Y_DEC";
+			CALL HB1C9; STRING '-';
+
+			IF ^.O THEN
+			BEGIN;
+				"JSR HCEC4		; Set Z04 := $FF";
+				"Token '1;'?";
+				CALL HCE9A;
+				IFF .O THEN Erreur;
+				GOTO OUT_DEY;
+			END;
+		"Y_EQ";
+			CALL HEQUAL;
+			BRK;
+			"TAY_";
+			".Y = ?A?";
+			CALL HREGA;
+			IF ^.O THEN
+			BEGIN;
+				CALL OUT_TAY;
+				IFF ^.O THEN reg_ok;
+			END;
+
+		"Y_value";
+			".Y = val?";
+			CALL OUT_LDY;
+			IFF ^.O THEN reg_value;
+
+	END;
+
+".S=";
+	CALL HREGS;
+	IF ^.O THEN
+	DO;
+		CALL HEQUAL;
+		BRK;
+		".S = .X?";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'TSX';
+			IFF ^.O THEN reg_ok;
+		END;
+	Erreur:
+		BRK;
+		RETURN;
+
+	reg_value:
+		".reg = val?";
+		"Valeur numerique ou id (-> H0250)";
+		CALL HCCE1;
+		IFF .O THEN Erreur;
+
+		"H0400 += H0250";
+		CALL HB225; STRING '%';
+
+	reg_ok:
+		"DISP(H0400)";
+		CALL HB119;
+
+		"GOTO HBA4E";
+		CALL HBA4E;
+		BRK;
+		RETURN;
+
+	END;
+
+".A=";
+	CALL HREGA;
+	IF ^.O THEN
+	BEGIN;
+		CALL HEQUAL;
+		BRK;
+		"TXA_";
+			".A = .X?";
+			CALL HREGX;
+			IF ^.O THEN
+			BEGIN;
+				CALL OUT_TXA;
+				IFF ^.O THEN reg_ok;
+			END;
+		"TYA_";
+			".A = .Y?";
+			CALL HREGY;
+			IF ^.O THEN
+			BEGIN;
+				CALL OUT_TYA;
+				IFF ^.O THEN reg_ok;
+			END;
+		"A_Indirect";
+			"OUT2 'LDA '";
+			CALL HCF17;
+			CALL HB1C9; STRING '@';
+			IF ^.O THEN
+			BEGIN;
+				"OUT2 '('";
+				CALL HB225; STRING '(';
+				"Identifiant uniquement";
+				"	CALL HC441; Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+				" Autorise un identifiant ou une valeur numerique";
+				" /!\ On peut saisir une valeur négative: .A = @-45[.Y] !!!";
+				"Identifiant ou valeur numérique (hexa,binaire, décimale, résultat dans le tampon H0400)?";
+				CALL HC46C;
+
+				"Avec controle des valeurs numeriques";
+				"	JSR HC4B0 ; Valeur numérique positive (hexa, binaire, décimal, résultat dans le tampon H0400)?";
+				"	BVC *+5";
+				"	JSR HC441 ; Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+
+				BRK;
+				CALL HB1C9; STRING '[';
+				BRK;
+				CALL HREGX;
+				IF ^.O THEN
+				BEGIN;
+					"OUT2 ',X)'";
+					CALL HB225; STRING ',X)';
+					IFF ^.O THEN CloseBracket;
+				END;
+				"A_IndirectY";
+					CALL HREGY;
+					BRK;
+					CALL HB225; STRING '),Y';
+					IFF ^.O THEN CloseBracket;
+			END;
+		"A_Index";
+			"Identifiant uniquement";
+			"Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+			CALL HC441;
+
+			" A voir, si on active ce qui suit, on ne peut pas avoir: .A = $45 -> LDA #$45";
+
+			" Autorise un identifiant ou une valeur numerique";
+			" /!\ On peut saisir une valeur négative: .A = @-45[.Y] !!!";
+			"	JSR HC46C; Identifiant ou valeur numérique (hexa,binaire, décimale, résultat dans le tampon H0400)?";
+
+			" Avec controle des valeurs numeriques";
+			"	JSR HC4B0 ; Valeur numérique positive (hexa, binaire, décimal, résultat dans le tampon H0400)?";
+			"	BVC *+5 ";
+			"	JSR HC441; Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+
+			IFF .O THEN reg_value;
+			CALL HB1C9; STRING '[';
+			IFF .O THEN reg_ok;
+			CALL HREGX;
+			IF ^.O THEN
+			BEGIN;
+				CALL HB225; STRING ',X';
+				IFF ^.O THEN CloseBracket;
+			END;
+		"A_IndexY";
+			CALL HREGY;
+			IFF .O THEN Erreur;
+			CALL HB225; STRING ',Y';
+
+		CloseBracket:
+			CALL HB1C9; STRING ']';
+			BRK;
+			IFF ^.O THEN reg_ok;
+
+	END;
+
+" Suite analyse de la syntaxe";
+"end_nok";
+	"CALL HB375		; Test initialement en HB9FB";
+	GOTO HB9FE;		"Retour";
+	"RETURN;";
+
+
+" -----------------------------------------------------------------------------";
+" .regs = ##id ";
+" -----------------------------------------------------------------------------";
+
+ _REGAY:
+	CALL HB225; STRING 'LDA #<';
+
+ _REG_Y:
+	CALL HC441;
+	BRK;
+	CALL HB119;
+	CALL HB225; STRING 'LDY #>';
+	IFF ^.O THEN _OUT;
+
+ _REGXY:
+	CALL HB225; STRING 'LDX #<';
+	IFF ^.O THEN _REG_Y;
+
+ _REGAX:
+	CALL HB225; STRING 'LDA #<';
+
+ _REG_X:
+	CALL HC441;
+	BRK;
+	CALL HB119;
+	CALL HB225; STRING 'LDX #>';
+	IFF ^.O THEN _OUT;
+
+ _REGYX:
+	CALL HB225; STRING 'LDY #<';
+	IFF ^.O THEN _REG_X;
+
+ _REGXA:
+	CALL HB225; STRING 'LDX #<';
+
+ _REG_A:
+	CALL HC441;
+	BRK;
+	CALL HB119;
+	CALL HB225; STRING 'LDA #>';
+	IFF ^.O THEN _OUT;
+
+ _REGYA:
+	CALL HB225; STRING 'LDY #<';
+	IFF ^.O THEN _OUT;
+	RETURN;
+
+ _OUT:
+	CALL HCF78;
+	BRK;
+	RETURN;
 
 " =============================================================================";
 "			Routines utilitaires";
@@ -6095,6 +6659,118 @@ IF_BIT:
 	END;
 
  TEST_End:
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+To_Regs:
+To_AY:
+	CALL HREGAY;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGAY;
+
+		CALL HSTOREW;
+		BRK;
+		"OUT2 'LDA '";
+		CALL HCF17;
+
+To__Y:
+		CALL HC441;
+		BRK;
+		CALL HB119;
+		CALL OUT_LDY;
+
+To___:
+		CALL HCF93;
+		CALL HCFA0;
+		CALL HCEDB;
+		RETURN;
+	END;
+
+"To_XY";
+	CALL HREGXY;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGXY;
+
+		CALL HSTOREW;
+		BRK;
+		CALL OUT_LDX;
+		IFF ^.O THEN To__Y;
+	END;
+
+
+"To_AX";
+	CALL HREGAX;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGAX;
+
+		CALL HSTOREW;
+		BRK;
+		CALL HCF17;
+
+To__X:
+		CALL HC441;
+		BRK;
+		CALL HB119;
+		CALL OUT_LDX;
+
+To____:
+		IFF ^.O THEN To___;
+	END;
+
+
+"To_YX";
+	CALL HREGYX;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGYX;
+
+		CALL HSTOREW;
+		BRK;
+		CALL OUT_LDY;
+		IFF ^.O THEN To__X;
+	END;
+
+"To_XA";
+	CALL HREGXA;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGXA;
+
+		CALL HSTOREW;
+		BRK;
+		CALL OUT_LDX;
+
+To__A:
+		CALL HC441;
+		BRK;
+		CALL HB119;
+		CALL HCF17;
+		IFF ^.O THEN To____;
+	END;
+
+"To_YA";
+	CALL HREGYA;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O  THEN GOTO _REGYA;
+
+		CALL HSTOREW;
+		BRK;
+		CALL OUT_LDY;
+		IFF ^.O THEN To__A;
+	END;
+
+"To___End";
 	RETURN;
 
 
@@ -6274,14 +6950,14 @@ IF_BIT:
 	RETURN;
 
  HexToASCII:
-	"STACK .A;"; 'PHA';
+	STACK .A;
 	SHR A;
 	SHR A;
 	SHR A;
 	SHR A;
 	CALL ASCII;
-	".X = .A;"; 'TAX';
-	"UNSTACK .A;"; 'PLA';
+	.X = .A;
+	UNSTACK .A;
 	'AND #$0f';
  ASCII:
 	CLR .C;
@@ -6293,5 +6969,29 @@ IF_BIT:
 
 " -----------------------------------------------------------------------------";
 " -----------------------------------------------------------------------------";
+OUT_LDX:
+	CALL HB225; STRING 'LDX ';
+	RETURN;
+
+OUT_LDY:
+	CALL HB225; STRING 'LDY ';
+	RETURN;
+
+OUT_TXA:
+	CALL HB21E; STRING 'TXA';
+	RETURN;
+
+OUT_TYA:
+	CALL HB21E; STRING 'TYA';
+	RETURN;
+
+OUT_STX:
+	CALL HB225; STRING 'STX ';
+	RETURN;
+
+OUT_STY:
+	CALL HB225; STRING 'STY ';
+	RETURN;
+
 EXIT;
 
