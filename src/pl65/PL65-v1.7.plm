@@ -1,0 +1,7363 @@
+			"ORG $B000";
+" -----------------------------------------------------------------------------";
+" Special ca65";
+" -----------------------------------------------------------------------------";
+'.feature pc_assignment';
+'.feature loose_char_term';
+'.feature loose_string_term';
+'.feature labels_without_colons';
+
+" -----------------------------------------------------------------------------";
+" Déclaration des variables en page zéro";
+" -----------------------------------------------------------------------------";
+DEF Z00 = $00;
+DEF Z01 = $01;
+DEF Z02 = $02;
+DEF Z03 = $03;
+DEF Z04 = $04;
+DEF Z05 = $05;
+DEF Z06 = $06;
+DEF Z08 = $08;
+DEF Z09 = $09;
+DEF Z0A = $0A;
+DEF Z0B = $0B;
+DEF Z0C = $0C;
+DEF Z0D = $0D;
+DEF Z0E = $0E;
+DEF Z0F = $0F;
+DEF Z10 = $10;
+DEF Z12 = $12;
+DEF Z13 = $13;
+DEF Z14 = $14;
+DEF Z15 = $15;
+DEF Z16 = $16;
+DEF Z17 = $17;
+DEF Z18 = $18;
+DEF Z19 = $19;
+DEF Z1A = $1A;
+DEF Z1B = $1B;
+DEF Z1C = $1C;
+DEF Z1D = $1D;
+DEF Z1E = $1E;
+DEF Z1F = $1F;
+
+DEF Z23 = $23;
+
+DEF H000E = $000E;
+DEF H0019 = $0019;
+
+" -----------------------------------------------------------------------------";
+" Déclaration des différents tampons";
+" -----------------------------------------------------------------------------";
+DEF H0112 = $0112;
+DEF H014B = $014B;
+DEF H0158 = $0158;
+
+DEF H0200 = $0200;
+DEF H0250 = $0250;
+
+DEF H02A0 = $02A0;
+DEF H02A1 = $02A1;
+
+DEF H0400 = $0400;
+DEF H0401 = $0401;
+
+DEF H0450 = $0450;
+DEF H0451 = $0451;
+
+" -----------------------------------------------------------------------------";
+" Déclaration de variables moniteur";
+" -----------------------------------------------------------------------------";
+DEF HA404 = $A404;
+DEF HA40E = $A40E;
+DEF HA42E = $A42E;
+
+" -----------------------------------------------------------------------------";
+"Déclaration des routines moniteur";
+" -----------------------------------------------------------------------------";
+DEF HE154 = $E154;
+DEF HE1A1 = $E1A1;
+DEF HE32F = $E32F;
+DEF HE50A = $E50A;
+DEF HE83B = $E83B;
+DEF HE848 = $E848;
+DEF HE871 = $E871;
+DEF HE8FE = $E8FE;
+DEF HE907 = $E907;
+DEF HE973 = $E973;
+DEF HE97A = $E97A;
+DEF HE993 = $E993;
+DEF HE9BC = $E9BC;
+DEF HE9F0 = $E9F0;
+DEF HEA13 = $EA13;
+DEF HEA46 = $EA46;
+DEF HEA7D = $EA7D;
+DEF HEB44 = $EB44;
+DEF HEF02 = $EF02;
+DEF HF8BC = $F8BC;
+
+
+" -----------------------------------------------------------------------------";
+" Début de PL/65";
+" -----------------------------------------------------------------------------";
+ HB000:
+	CALL HEA13;
+	ENTRY $B003, $20;
+
+	"DEF HCFB0 = $CFB0;";
+	Z06 =## HCFB0;
+	CALL HB909;
+	CALL HEA13;
+	Z1E = $00;
+	CALL HE848;
+	CALL HE83B;
+	CALL HE871;
+	CALL HF8BC;
+	CALL HEA13;
+
+	"DEF HB945 = $B945;";
+	Z06 =## HB945;
+	CALL HB909;
+	CALL HE973;
+
+	IFF .A ^= $0D THEN HB03C;
+
+	.A = '2';
+
+HB03C:
+	CALL HEA7D;
+	Z1D = .A;
+	CALL HEA13;
+
+HB044:
+	CALL HB072;
+	.A = $0D;  CALL HE9BC;
+	CALL HE50A;
+	CALL HE8FE;
+
+	HA404 =## HE154;
+	Z06 =## HB93C;
+
+	CALL HB909;
+	.A = Z0D;
+	CALL HEA46;
+	CALL HE9F0;
+	GOTO HE1A1;
+
+" -----------------------------------------------------------------------------";
+"Initialisation des variables";
+" -----------------------------------------------------------------------------";
+
+HB072:
+	Z04 = $FF;
+	Z0C = .A;
+
+	Z01 = $4F;
+	Z1F = $00;
+	CLR .V;
+
+	HA404 =## HB6E1;
+	Z18 = $20;
+
+	Z0A = $99;
+	Z0B = .A;
+
+	Z12 = $5A;
+	Z13 = .A;
+
+	Z02 = $00;
+	Z03 = .A;
+	Z0D = .A;
+
+	"On peut remplacer le 'FOR...' par 'H0450.$50 = $20;'";
+	"2 fois plus rapide et plus court (16 octets contre 28)";
+
+	"Supprimer le 'LDA #0' inutile";
+	"Remplacer le LDA Z10/TAY par LDY Z10";
+	FOR Z10 = 0 TO 79
+	DO;
+		H0450[Z10] = $20;
+		"H0400[Z10] = $20";
+		'STA H0400,Y';
+
+	END;
+
+	CALL HB6B3;
+	CALL HB955;  "Compilation";
+
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Affiche '????? ?ERROR'";
+" Le dernier '?' indique le caractère qui a généré l'erreur'";
+" -----------------------------------------------------------------------------";
+ HB0C8:
+	CLR .V;
+	Z04 = $FF;
+	Z0C = .A;
+	INC Z0D;
+	Z02 = $00;
+	Z03 = .A;
+
+	"Supprimer le 'LDA #0' inutile";
+	FOR Z10 = 0 TO Z01
+	DO;
+		Z00 = $3F;
+		CALL HE9BC;
+	END;
+
+" -----------------------------------------------------------------------------";
+" Affiche '? ERROR'";
+" -----------------------------------------------------------------------------";
+
+ HB0F0:
+	FOR Z08 = 0 TO 6
+	DO;
+		Z00 = HB112[Z08]; "remplacer LDA Z08/TAX par LDX Z08";
+		CALL HE9BC;
+	END;
+
+	GOTO HB19A;
+	RETURN;
+
+ HB112: DATA '? ERROR';
+
+
+" -----------------------------------------------------------------------------";
+" Affichage du contenu du tampon H0400 si 2 passes";
+
+"	1 passe: Initialisation du tampon H0400 avec des ' '";
+"	2 passes: Affiche le contenu du tampon H0400";
+"		Si Z1F == 1, affiche sans traitement";
+"		Si Z1F != 1 et le tampon commence par un label, on arrête l'affichage au premier ' -' ou ' =' ou ' )' ou ' ,' ou ' +'";
+"			rencontré";
+"			Sinon, affiche le contenu du tampon";
+" -----------------------------------------------------------------------------";
+
+
+HB119:
+	"Si 1 passe";
+	IF Z1D = 1 THEN GOTO HB19D;
+
+ HB125:
+	"2 passes";
+	CALL HE907;
+	HA404 = ##HB6E1;
+
+	IF Z08 = $00 THEN RETURN;
+
+	"Traitement et affichage du tampon H0400";
+
+	Z08-1;
+	FOR Z10 = 0 TO Z08
+	DO;
+		"Z00 = H0400[Z10];";  "Remplacer LDA Z10/TAX par LDX Z10";
+		.X=Z10; Z00 = H0400[.X]; "Version optimisee";
+
+		"Remplacer BNE *+5/JMP ZZnnnn par BEQ ZZnnnn (HB18E)";
+		"Ou mettre: .A=Z1F; IFF .A=1 THEN HB18E;";
+		IF 1 ^= Z1F THEN
+		DO;
+
+			"Remplacer BEQ *+5/JMP ZZnnnn par BNE ZZnnnn";
+			"Ou mettre: .A=Z00, IFF .A^=$20 THEN HB18E;";
+			IF $20 = Z00 THEN
+			DO;
+				.Y = Z10;
+				INC .Y;
+
+				.A = H0400[.Y];
+
+				IFF .A  = '-' THEN HB178;
+				IFF .A  = '=' THEN HB178;
+				IFF .A  = ')' THEN HB178;
+				IFF .A  = ',' THEN HB178;
+				IFF .A ^= '+' THEN HB17B;
+
+				HB178:
+				CALL HB1BF;
+
+				HB17B:
+				IFF .A ^= $20 THEN HB18E;
+
+				.A = $5A;
+				IFF  .A ^= H0400 THEN HB18E;
+				IFF  .A ^= H0401 THEN HB18E;
+
+				GOTO HB19A; "Sortie de la boucle, on a vu un label ZZnnnn";
+			END;
+		END;
+		HB18E:
+	       .A = Z00; CALL HE9BC;
+	END;
+
+
+" -----------------------------------------------------------------------------";
+" Affiche un CR/LF et initialise le tampon H0400-H044F avec des ' '";
+
+" Entrée:";
+
+" Sortie:";
+"	ACC: 0";
+"	Y  : $4F";
+"	Z08: 0";
+"	Z1F: 0";
+" -----------------------------------------------------------------------------";
+
+
+ HB19A:
+	CALL HB932;
+
+ HB19D:
+	FOR Z08 = 0 TO 79
+		H0400[Z08] = $20;
+
+	Z08 = $00;
+	Z1F = .A;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Met le caractère suivant du tampon H0400 en Z00";
+
+" Entrée:";
+
+" Sortie:";
+"	Z10: Z10+1";
+"	Z00: Caractère";
+"	ACC: Caractère";
+"	X  : Z10";
+" -----------------------------------------------------------------------------";
+
+ HB1BF:
+	Z10+1;
+	Z00 = H0400[Z10];
+	RETURN;
+
+
+
+" -----------------------------------------------------------------------------";
+" Compare une chaine, dernier caractère avec b7=1, avec le tampon d'entrée H0450";
+" Copie la chaine trouvée dans le tampon H0200";
+
+" JSR HB1C9";
+" .asc 'Chaine de caractere', 's'+$80";
+
+" Sortie:";
+"	V=0: Chaine trouvée";
+"	V=1: Chaine non trouvée";
+" -----------------------------------------------------------------------------";
+
+ HB1C9:
+	CALL HB916;
+	CALL HB88F;
+	CLR .O;
+	Z10 = Z01;
+	CALL HB875;
+
+	WHILE Z00 ^= 0
+	BEGIN;
+		"Patch pour les minuscules pour les instructions";
+		" [--------------";
+		"IF H0450[Z10] ^= Z00 THEN CALL HB905;";
+		IF $60 < H0450[Z10] THEN 'AND #$DF';
+		IF .A ^= Z00 THEN CALL HB905;
+		" --------------]";
+
+		CALL HB865;
+		Z10+1;
+	END;
+
+	IF .O THEN GOTO HB21B;
+
+	Z02 = Z10-Z01;
+
+	"Copie de Z02 octets depuis H0450[Z01] vers H0200";
+	H0200.Z02 = H0450[Z01]; "remplacer LDA Z01/TAX par LDX Z01 et R0=Z20";
+
+	Z01 = Z10;
+
+ HB21B:
+	GOTO HB8FF;
+
+
+" -----------------------------------------------------------------------------";
+" JSR HB21E";
+" .asc 'Chaine de caractere', 's'+$80";
+" -----------------------------------------------------------------------------";
+
+ HB21E:
+	Z1B = $01;
+	GOTO HB229;
+
+ HB225:
+	Z1B = $00;
+
+ HB229:
+	CALL HB916;
+	Z10 = $00;
+	CALL HB875;
+
+	IF Z00 = $2A THEN
+		DO; "Traitement *";
+			WHILE Z10 < Z02
+			BEGIN;
+				Z00 = H0200[Z10];
+				CALL HB8F5;
+				Z10+1;
+			END;
+			CALL HB678;
+		END;
+	ELSE IF Z00 = $25 THEN
+		DO; "Traitement %";
+			WHILE Z10 < Z03
+			BEGIN;
+				Z00 = H0250[Z10];
+				CALL HB8F5;
+				Z10+1;
+			END;
+			Z03 = $00;
+			CALL HB678;
+		END;
+	ELSE
+		DO; "Traitement caractère normal";
+			WHILE Z00 ^= 0
+			BEGIN;
+				CALL HB8F5;
+				CALL HB865;
+			END;
+		END;
+
+	IF Z1B = $01 THEN CALL HB119;
+	GOTO HB8FF;
+
+
+
+" -----------------------------------------------------------------------------";
+" JSR HB2A6";
+" .db 'c'+$80";
+
+" Cherche le caractère 'c' dans le tampon H0450";
+
+" Sortie:";
+" -----------------------------------------------------------------------------";
+
+ HB2A6:
+	CALL HB88F;
+	CALL HB916;
+	CALL HB875;
+
+	Z05=Z00;
+
+ HB2B3:
+	WHILE Z01<79
+	BEGIN;
+		IF H0450[Z01] = Z05 THEN
+		DO;
+			CALL HB678;
+			GOTO HB8FF;
+		END;
+		Z01+1;
+	END;
+
+	CALL HB719;
+	GOTO HB2B3;
+
+
+" -----------------------------------------------------------------------------";
+" Appelé depuis HCCCB pour faire un JSR HB9DC";
+
+" /?\Un peu compliqué pour faire un simple JSR...";
+
+" Entrée:";
+
+" Sortie:";
+" -----------------------------------------------------------------------------";
+
+ HB2D9:
+	CALL HB916;
+	Z1B = Z0E;
+	Z1C = Z0F;
+	CALL HB85E;
+	Z04 = $00;
+	H02A0 = Z01;
+	STACK WORD Z0E;
+	Z19 = &Z1B;
+	Z1A=&Z1B[1];
+	GOTO @H0019;
+
+
+" -----------------------------------------------------------------------------";
+ " Set Z04 := $FF";
+" -----------------------------------------------------------------------------";
+
+ HB309:
+	CALL HB916;
+	Z04 = $FF;
+	GOTO HB8FF;
+
+
+" -----------------------------------------------------------------------------";
+" Traitement chaine entre ''";
+" '' est remplacé par '";
+
+" Exemple:";
+"		'LDA #$02' => LDA #$02";
+"		'LDA #''A' => LDA #'A";
+"		DATA 'TEST'";
+
+"	Sortie:";
+"		V=0: Ok (tampon H0200 contient la chaine)";
+"		V=1: Non";
+"		Si chaine non terminée -> '??? ERROR'";
+" -----------------------------------------------------------------------------";
+
+ HB313:
+	CALL HB88F;
+	IF H0450[Z01] = $27 THEN
+	DO;
+		CLR .V;
+		Z02= $00;
+		Z01+1;
+
+		WHILE Z02=Z02
+		BEGIN;
+			WHILE Z01 < 79
+			BEGIN;
+				IF H0450[Z01] = $27 THEN
+				DO;
+					IF H0450[Z01+1] ^= $27 THEN
+						RETURN;
+					Z01+1;
+				END;
+				H0200[Z02] = H0450[Z01];
+				Z02+1;
+				Z01+1;
+			END;
+			GOTO HB0C8;
+		END;
+	END;
+	CALL HB905;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Vérifie que le tampon H0450 commence par un identifiant (chaine AlphaNumérique commencant par une lettre)";
+" Si oui, copie l'identifiant dans le tampon H0200 suivi d'un ' ' et avance l'index du tampon H0450 aprés l'identifiant";
+
+" Sortie:";
+"	V=0: Oui";
+"	V=1: Non";
+" -----------------------------------------------------------------------------";
+
+ HB375:
+	CALL HB88F;
+
+	Z10 = Z01;
+	CLR .O;
+	Z09 = $00;
+
+	Z00 = H0450[Z10]; "remplacer LDA Z10/TAX par LDX Z10";
+
+	WHILE Z00 ^= 32
+	BEGIN;
+		CALL HB8BD;
+		Z00 = $20;
+		IF Z10 < $50 THEN
+			IF Z1B ^= $02 THEN
+				IF Z09 ^= $00 THEN CALL HB84F;
+				ELSE IF Z1B = $00 THEN CALL HB84F;
+	END;
+
+
+" -----------------------------------------------------------------------------";
+" Copie de H0450 vers H0200 et ajoute un ' ' à la fin de H0200";
+" Sortie avec V=1 si Z09=0";
+" -----------------------------------------------------------------------------";
+
+ HB3CA:
+	IF Z09 ^= 0 THEN
+	DO;
+		Z02 = Z09;
+
+	 	"Copie de Z02 octets depuis H0450[Z01] vers H0200";
+	 	H0200.Z02 = H0450[Z01]; "remplacer LDA Z01/TAX par LDX Z01 et R0=Z20";
+		Z01 = Z10;
+		H0200[Z02] = $20;
+		Z02+1;
+	END;
+	ELSE
+		CALL HB905;
+
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Vérifie que le tampon H0450 commence par un nombre décimal positif";
+" Si oui, copie le nombre dans le tampon H0200 et avance l'index du tampon H0450 aprés le nombre";
+
+" Sortie:";
+"	V=0: Oui";
+"	V=1: Non";
+" -----------------------------------------------------------------------------";
+
+ HB3FF:
+	CALL HB88F;
+	Z10 = Z01;
+	CLR .O;
+	Z09 = $00;
+
+	Z00= H0450[Z10]; "remplacer LDA Z10/TAX par LDX Z10";
+
+	WHILE Z00 ^= 32
+	BEGIN;
+		CALL HB8BD;
+		Z00 = $20;
+		IF Z10 < $50 THEN
+			IF Z1B = $01 THEN CALL HB84F;
+	END;
+
+
+" -----------------------------------------------------------------------------";
+" Copie Z09 caractères du tampon H0450[Z01] vers le tampon H0200";
+
+" Sortie avec V=1 si Z09=0";
+" -----------------------------------------------------------------------------";
+
+	IF Z09 ^= 0 THEN
+	DO;
+		Z02 = Z09;
+
+	 	"Copie de Z02 octets depuis H0450[Z01] vers H0200";
+	 	H0200.Z02 = H0450[Z01]; "remplacer LDA Z01/TAX par LDX Z01 et R0=Z20";
+
+		Z01 = Z10;
+	END;
+	ELSE CALL HB905;
+
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" JSR HB468";
+" .asc 'Chaine de caractere', 's'+$80";
+
+" Ajoute la chaine dans le tampon H0250";
+
+" Si la chaine est '*', on ajoute le contenu du tampon H0200";
+" au tampon H0250 et on sort";
+
+" Sortie:";
+"	V=1		: plus de 79 caractères dans le tampon H0250";
+"	Z1E=0	: on a ajouté le contenu du tampon H0200";
+" -----------------------------------------------------------------------------";
+
+
+ HB468:
+	CALL HB916;
+	CALL HB875;
+
+	IF Z00 = $2A THEN
+	DO;
+		H0250[Z03].Z02 = H0200; "remplacer LDA Z03/TAY par LDY Z03";
+		Z03 = Z03+Z02;
+		CALL HB678;
+	END;
+	ELSE
+		WHILE Z00 ^= 0
+		BEGIN;
+			IF Z03 < $50 THEN
+			DO;
+				H0250[Z03] = Z00; "remplacer LDA Z03/TAY par LDY Z03";
+				INC Z03;
+				CALL HB865;
+			END;
+			ELSE
+				CALL HB905;
+		END;
+
+	GOTO HB8FF;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute le contenu du tampon H0200 dans le tampon H0250";
+
+
+" JSR HB4C4";
+" .asc 'Chaine de caractere', 's'+$80";
+
+" Ajoute la chaine dans le tampon H02A1";
+
+" Si la chaine est '%', on ajoute le contenu du tampon H0250";
+" au tampon H02A1 et on sort";
+
+" Si la chaine est '*', on ajoute le contenu du tampon H0200";
+" au tampon H02A1 et on sort";
+
+" Format du tampon (tableau):";
+"	<chaine1><len1><chaine2><len2>...";
+
+" Sortie:";
+" -----------------------------------------------------------------------------";
+
+
+ HB4C4:
+	CALL HB916;
+	CALL HB875;
+	Z0C+1;
+	Z09 = $00;
+
+	IF Z00 = $25 THEN
+		DO; "Traitement %";
+			Z09 = Z03;
+			IF Z09 = $00 THEN
+				GOTO HB831;
+
+			H02A1[Z0C].Z09 = H0250; "remplacer LDA Z0C/TAY par LDY Z0C";
+			Z03 = $00;
+			CALL HB678;
+		END;
+
+	ELSE IF Z00 = $2A THEN
+		DO; "Traitement *";
+			Z09 = Z02;
+			IF Z09 = $00 THEN
+				GOTO HB831;
+
+			H02A1[Z0C].Z09 = H0200; "remplacer LDA Z0C/TAY par LDY Z0C";
+			Z02 = $00;
+			CALL HB678;
+		END;
+	 ELSE
+		DO; "Traitement caractère normal";
+			WHILE Z00 ^= 0
+			BEGIN;
+				H02A1[Z0C+Z09] = Z00;
+				INC Z09;
+				CALL HB865;
+			END;
+		END;
+
+	Z0C = Z0C + Z09;
+
+	IF Z0C > $4F THEN GOTO HB835;
+
+	H02A1[Z0C] = Z09;
+	GOTO HB8FF;
+
+
+" -----------------------------------------------------------------------------";
+" Copie la dernière chaine du tampon H02A1 dans le tampon H0200";
+" (PAS de mise à jour de l'index du tampon H02A1)";
+" -----------------------------------------------------------------------------";
+
+ HB577:
+	Z1B = $00;
+	GOTO HB582;
+
+" -----------------------------------------------------------------------------";
+" Déplace la dernière chaine du tampon H02A1 vers le tampon H0200";
+" (mise à jour de l'index du tamn H02A1)";
+" -----------------------------------------------------------------------------";
+ HB57E:
+	Z1B = $01;
+
+" -----------------------------------------------------------------------------";
+" Format du tampon H02A1:";
+"	<chaine1><len1><chaine2><len2>...";
+" -----------------------------------------------------------------------------";
+ HB582:
+	IF Z0C = $FF THEN GOTO HB835;
+
+	Z02 = H02A1[Z0C]; "remplacer LDA Z0C/TAX par LDX Z0C";
+	Z09 = Z0C - Z02;
+
+	H0200.Z02 = H02A1[Z09]; "remplacer LDA Z09/TAX par LDX Z09";
+
+	"DEC Z09;"; Z09 - 1;
+
+	IF Z1B = $01 THEN Z0C = Z09;
+
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Gestion des labels";
+" JSR HB5C0";
+" .asc 'Chaine de caractere', 's'+$80";
+
+" '0,*' ou '0,%' ou '1,*' (ou '1,%' inutilisé)";
+
+"	0,*	: Ajoute le label actuel (Z12-Z18) dans le tampon H0400";
+"	0,%	: Ajoute le label actuel (Z12-Z18) dans le tampon H0250";
+"	1,*	: Créé un nouveau label et l'ajoute dans le tampon H0400";
+"	1,%	: Créé un nouveau label et l'ajoute dans le tampon H0250 (à priori inutilisé)";
+" -----------------------------------------------------------------------------";
+ HB5C0:
+	CALL HB916;
+	CALL HB875;
+
+	IF Z00 = $30 THEN
+		DO; "Traitement '0'";
+			CALL HB85B;
+			CALL HB875;
+			CALL HB678;
+
+			" Traitement '*'";
+			IF Z00 = $2A THEN CALL HB698;
+			ELSE CALL HB67D;
+		END;
+	ELSE
+		DO;
+			CALL HB85B;
+			CALL HB875;
+			CALL HB678;
+
+			IF Z00 = $2A THEN
+			DO; "Traitement '*'";
+				CALL HB6B3;
+				CALL HB698;
+			END;
+			ELSE
+			DO;
+				CALL HB6B3;
+				CALL HB67D;
+			END;
+		END;
+
+	GOTO HB8FF;
+
+
+" -----------------------------------------------------------------------------";
+"				Instruction '.DFILE '";
+" -----------------------------------------------------------------------------";
+ HB611:
+	CALL HB88F;
+
+	"Boucle H014B.6 = H0450; modifiée";
+	.X = 0;
+	.Y = Z01;
+ HB618:
+	.A = H0450[.Y];
+	IFF .A = ';' THEN HB62E;
+	IFF .A = '/' THEN HB62E;
+	'STA H014B,X';
+	INC .X;
+	INC .Y;
+	IFF .Y ^= 6 THEN HB618;
+	IFF .Z THEN HB638;
+
+ HB62E:
+	.A = ' ';
+	'STA H014B,X';
+	INC .X;
+	IFF .X ^= 6 THEN HB62E;
+
+ HB638:
+	Z01 = .Y;
+	.A = H0450[.Y];
+	IFF .A ^= '/' THEN HB64E;
+
+	H0158 = H0451[.Y] - '0';
+	INC .Y;
+	INC .Y;
+	Z01 = .Y;
+
+ HB64E:
+	GOTO H0112;
+
+" -----------------------------------------------------------------------------";
+"				Instruction '.TFILE '";
+" -----------------------------------------------------------------------------";
+ HB651:
+	CALL HB88F;
+	.A = $0D; CALL HEF02;
+	.Y = 0;
+	.X = Z01;
+
+ HB65D:
+	.A = H0450[.X];
+	INC .X;
+	IFF .A ^= ';' THEN HB668;
+	DEC .X;
+	.A = ' ';
+ HB668:
+	'STA HA42E,Y';
+	CALL HEF02;
+	INC .Y;
+	IFF .Y ^= 5 THEN HB65D;
+
+	Z01 = .X;
+	GOTO HE32F;
+
+
+" -----------------------------------------------------------------------------";
+" Clear Z1E";
+" -----------------------------------------------------------------------------";
+
+ HB678:
+	Z1E = $00;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" Ajoute les caractères de Z12 à Z18 dans le tampon H0250";
+" Ajuste l'index Z03";
+
+" Entrée:";
+
+" Sortie:";
+"	ACC	: (Z03)+7";
+"	X	: 7";
+"	Y	: (Z03)+7";
+"	Z03 += 7";
+"	Z20	: 0";
+" -----------------------------------------------------------------------------";
+
+ HB67D:
+	H0250[Z03].7 = Z12; "remplacer LDA Z03/TAY par LDY Z03";
+	Z03 = Z03 +7;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute les caractères de Z12 à Z18 dans le tampon H0400";
+" Ajuste l'index Z08";
+
+" Entrée:";
+
+" Sortie:";
+"	ACC	: (Z08)+7";
+"	X	: 7";
+"	Y	: (Z08)+7";
+"	Z08 += 7";
+"	Z20	: 0";
+" -----------------------------------------------------------------------------";
+
+ HB698:
+	H0400[Z08].7 = Z12; "remplacer LDA Z08/TAY par LDY Z08";
+	Z08 = Z08 +7;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Generation n° de label suivant";
+" Incrémente Z0A-Z0B (valeur décimale) + conversion en ASCII en Z14-Z17";
+" -----------------------------------------------------------------------------";
+ HB6B3:
+	SET .D;
+	Z0B = Z0B+1;
+	.A = Z0A;
+	'ADC #$00';
+	Z0A = .A;
+	CLR .D;
+
+	CALL HB6D3;
+
+	Z14 <- .XA;
+	"Z14 = .X;";
+	"Z15 = .A;";
+
+	.A = Z0B; CALL HB6D3;
+
+	Z16 <- .XA;
+	"Z16 = .X;";
+	"Z17 = .A;";
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Converti ACC en 2 caractères ASCII";
+
+" Entrée:";
+"	ACC: Valeur Hexa";
+"	X  : Dizaine";
+"	ACC: Unité";
+" -----------------------------------------------------------------------------";
+ HB6D3:
+	STACK .A;
+	SHR A; "'LSR';";
+	SHR A; "'LSR';";
+	SHR A; "'LSR';";
+	SHR A; "'LSR';";
+	'ORA #"0"';
+	.X = .A;
+	UNSTACK .A;
+	'ORA #$F0';
+	'AND #$3F';
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" Vecteur IRQV2";
+" Si V=0 => retour à l'octet juste après le BRK";
+" Si V=1 et Z04=0 => restaure l'index du tampon H0450, Z04=$ff et retour à l'appelant de la routine contenant le BRK";
+" Si V=1 et Z04>0 => retour à l'appelant de la routine contenant le BRK";
+" -----------------------------------------------------------------------------";
+ HB6E1:
+	UNSTACK .P;
+
+	IF .O THEN
+	DO;
+		UNSTACK .A;
+		UNSTACK .A;
+
+		Z03 = 0;
+
+		IF Z04 = Z03 THEN
+		DO;
+			Z01 = H02A0;
+			Z04 = $FF;
+		END;
+
+		RETURN;
+	END;
+
+	"Traitement IRQV2 si V=0";
+	"Pour un BRK, l'adresse empilée est celle du BRK+2";
+	CALL HB916;
+	H000E == Z0E-HB953; "ou H000E.2 = Z0E-HB953";
+	CLR .O;
+	GOTO HB8FF;
+
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+ HB719:
+	CALL HB76D;
+	Z1F = 1;
+
+	IF H0450 = '*' THEN
+	DO;
+		CALL HB765;
+		CALL HB125;
+
+		HB730:
+		CALL HB76D;
+
+		IF H0450 ^= '*' THEN
+		DO;
+			IF Z1D = 1 THEN CALL HB765;
+
+			CALL HB125;
+			GOTO HB730;
+		END;
+		ELSE
+		DO;
+			CALL HB765;
+			CALL HB125;
+			GOTO HB719;
+		END;
+	END;
+	ELSE
+	DO;
+ HB75E:
+		CALL HB765; "Clear Display and Printer pointers and output ';'";
+		CALL HB125; "Affiche le contenu du tampon H0400";
+		RETURN;
+	END;
+
+
+" -----------------------------------------------------------------------------";
+" Clear Display and Printer pointers and output ';'";
+" -----------------------------------------------------------------------------";
+
+ HB765:
+	CALL HEB44;
+	.A = ';'; GOTO HE9BC;
+
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+ HB76D:
+	H0450.$50 = $20;
+
+	Z01 = 0;	"Index pour H0450";
+	Z10 = .A;	"Compteur de boucle";
+	Z08 = .A;	"Index pour H0400";
+
+	Z00 = $20;
+	WHILE Z00 ^= 13
+	DO;
+		HB792:
+		CALL HE993;
+		Z00 = .A;
+		IF Z00 = $0A THEN GOTO HB792;	"Saute le LF";
+
+		IF Z00 = 0 THEN GOTO HB82D;	"Sortie de la boucle";
+
+		IF Z00 = 9 THEN Z00 = $21;	"Tabulation";
+
+		IF Z00 = $21 THEN
+		DO;
+			IF Z1D = 1 THEN
+			DO;
+				Z08 +4;
+				CLR BIT[3] OF Z08;
+			END;
+			Z00 = $20;
+		END;
+
+		H0400[Z08] = Z00;	"Remplacer LDA Z08/TAY par LDY Z08";
+		H0450[Z08] = Z00;	"Remplacer LDA Z08/TAY par LDY Z08";
+		"Supprimer le LDA Z00 inutile";
+		"Et meme le LDY Z08 deja fait!";
+
+		INC Z08;
+	END;
+
+	IF Z08 > $4F THEN GOTO HB839;
+
+	Z1B = Z08 - 1;
+	H0400[Z1B] = $20; "Remplacer le LDA Z1B/TAY par LDY Z1B";
+
+	IF Z1B ^= 0 THEN H0450[Z1B] = $20;
+
+	IF H0450 = $0D THEN
+	BEGIN;
+		GOTO HB76D;
+
+		GOTO HB82D; "Residu???";
+	END;
+
+	RETURN;
+
+ "HB82D";
+
+" -----------------------------------------------------------------------------";
+" Restaure IRQV2 à sa valeur d'origine (HE154) + BRK";
+
+" En fonction du point d'entrée charge A,X,Y avec 0,1,2 ou 3";
+" -----------------------------------------------------------------------------";
+ HB82D:
+	.Y = 0; IFF .Z THEN HB83B;
+
+ HB831:
+	.Y = 1; IFF ^.Z THEN HB83B;
+
+ HB835:
+	.Y = 2; IFF ^.Z THEN HB83B;
+
+ HB839:
+	.Y = 3;
+
+ HB83B:
+	.X = 1;
+	HA40E = .X;
+	HA404 =## HE154;
+	.A = .Y;
+	.X = .A;
+	GOTO HB92E;
+
+
+" Prend le prochain caractère du tampon H0450 (indexé par Z10) et incrémente Z09";
+
+ HB84F:
+	INC Z10;
+	INC Z09;
+	Z00 = H0450[Z10]; "remplacer LDA Z10/TAX par LDX Z10";
+	RETURN;
+
+
+" Ajoute 2 a Z0E-Z0F";
+
+ HB85B:
+	CALL HB85E;
+
+
+" Incremente Z0E-Z0F";
+
+ HB85E:
+	INCW Z0E;
+	RETURN;
+
+
+" Lit le prochain caractère de la chaine (Z0E-Z0F)";
+
+" Sortie:";
+"	Z00: caractère lu (0 si fin de chaine)";
+
+ HB865:
+	IF Z1E = $00 THEN CALL HB85E;
+	CALL HB875;
+	RETURN;
+
+" Place le premier caractère de la chaine en Z00 et incrémente le flag Z1E si c'est le dernier (renvoie Z00=0 si Z1E<>0 avant l'appel)";
+
+ HB875:
+	.A = Z1E;
+	IF ^.Z THEN
+	DO;
+		Z00 = 0;
+		Z1E = .A;
+		Z00 = .A; "Pourquoi faire? deja fait";
+		RETURN;
+	END;
+HB882:
+	"Les 2 instructions suivantes sont équivalentes";
+	" a: .A = &Z0E qui n'est pas encore pris en compte...";
+	.X = 0;
+	.A = @Z0E[.X];
+
+	IF - THEN INC Z1E;
+	'AND #$7F';
+	Z00 = .A;
+	RETURN;
+
+
+
+" Avance l'index Z01 du tampon H0450 en sautant les ' ' (place le caractère en Z00)";
+
+ HB88F:
+	Z00=H0450[Z01]; "remplacer LDA Z01/TAX par LDX Z01";
+	WHILE Z00=32
+	DO;
+		IF Z01 < $4F
+		THEN
+			INC Z01;
+		ELSE
+			CALL HB719;
+
+		Z00=H0450[Z01]; "remplacer LDA Z01/TAX par LDX Z01";
+	END;
+	RETURN;
+
+
+" Test du caractère en Z00";
+
+" Entrée:";
+"	Z00: caractère à vérifier";
+
+" Sortie:";
+"	ACC: Modifié";
+"	Z1B: type de caractère: 00-> [A-\[], 01-> [0-9] , 02-> Autre";
+"				00-> Alpha, 01-> Numérique, 02-> Autre";
+
+
+ HB8BD:
+" Patch pour accepter les minuscules pour les identifiants";
+" Le masque $DF := 1101 1111 => masque le bit 5 qui indique les minuscules";
+" [------------------";
+"	Z1B = $02;";
+"	IF Z00 < $5B THEN";
+"		IF Z00 > $40 THEN";
+"			Z1B = $00;";
+"		ELSE IF Z00 < $3A THEN";
+"			IF Z00 > $2F THEN";
+"				Z1B = $01;";
+"	RETURN";
+
+	Z1B = $02;
+	IF '[' > Z00 .AND $DF THEN
+	BEGIN;
+		IF .A >= 'A' THEN
+			Z1B = $00;
+		ELSE IF Z00 < ':' THEN
+			IF Z00 > '/' THEN
+				Z1B = $01;
+	END;
+	ELSE IF .A = '_' THEN Z1B = $00;
+
+	RETURN;
+" ------------------]";
+
+" -----------------------------------------------------------------------------";
+" Ajoute (Z00) dans le buffer H0400";
+
+" Entrée:";
+"	Z00: Caractère à ajouter";
+"	Z08: Index dans le buffer";
+
+" Sortie:";
+"	ACC: (Z00)";
+"	Z08: (Z08)+1";
+" -----------------------------------------------------------------------------";
+
+ HB8F5:
+	H0400[Z08] = Z00; "remplacer LDA Z08/TAY par LDY Z08";
+	INC Z08;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Incrémente Z0E-Z0F et JMP (H000E)";
+" Simule un RETURN";
+" -----------------------------------------------------------------------------";
+
+ HB8FF:
+	CALL HB85E;
+	GOTO @H000E;
+
+
+" -----------------------------------------------------------------------------";
+" SEV (Set V:=1)";
+" [Optimisation] Remplacer les JSR HB905 par BIT HB92D (Gain: 4 Octets et 6+6=12 cycles par appel)";
+" -----------------------------------------------------------------------------";
+
+ HB905:
+ 	'BIT HB92D';
+ 	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Output (Z06-Z07) null terminated string";
+" -----------------------------------------------------------------------------";
+ HB909:
+	.Y = 0;
+
+ HB90B:
+	.A = @Z06[.Y];
+	IF ^= THEN
+	BEGIN;
+		CALL HE97A;
+		INC .Y;
+		IFF ^= THEN HB90B;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" Récupère l'adresse empilée (+1) avant l'adresse de retour et la met en Z0E-Z0F";
+" -----------------------------------------------------------------------------";
+ HB916:
+	UNSTACK Z19;
+	UNSTACK Z1A;
+	UNSTACK Z0E;
+	UNSTACK Z0F;
+	CALL HB85E;
+	CLR .O;
+	STACK Z1A;
+	STACK Z19;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Utilisé par l'instruction BIT en HB905 pour faire un SEV";
+" -----------------------------------------------------------------------------";
+
+ HB92D:
+	DATA $40;
+
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+ HB92E:
+	BRK;
+	GOTO HB044;
+
+
+" -----------------------------------------------------------------------------";
+" CR/LF";
+" -----------------------------------------------------------------------------";
+ HB932:
+	.A = $0D; CALL HE9BC;
+	.A = $0A; GOTO HE9BC;
+
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+ HB93C:
+	DATA 'ERRORS= ',0;
+
+ HB945:
+	DATA 'PASS(1 OR 2)?',0;
+
+ HB953:
+	DATAW 3;
+
+
+" -----------------------------------------------------------------------------";
+" Compilation";
+" -----------------------------------------------------------------------------";
+
+ HB955:
+	CALL HB96C;
+	IF ^.O THEN RETURN;
+
+ "Une erreur est survenue pendant la compilation";
+ "On l'indique";
+
+	CALL HB0C8;
+	CALL HB2A6;
+	STRING ';';
+	CALL HB1C9;
+	STRING ';';
+	BRK;
+	CALL HB955;
+	BRK;
+	RETURN;
+
+
+" =============================================================================";
+"			Boucle principale du compilateur";
+" =============================================================================";
+
+ HB96C:
+	"Pour la boucle suivante,il faudrait WHILE .flag";
+	IF ^.O THEN
+	DO;
+		CALL HCC67;
+		GOTO HB96C;
+	END;
+
+	CLR .O;
+	CALL HC229;
+	BRK;
+	RETURN;
+
+" =============================================================================";
+"		Boucle de compilation d'une expression";
+" =============================================================================";
+
+ HB97A:
+	CALL HB98B;
+	IF ^.O THEN
+	DO;
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+		HB97F:
+		IF ^.O THEN
+		DO;
+			CALL HB98B;
+			GOTO HB97F;
+		END;
+		CLR .O;
+		RETURN;
+	END;
+
+	CLR .O;
+	RETURN;
+
+
+" Compilation d'une expression simple";
+
+ HB98B:
+	CALL HC9C6;
+	IF ^.O THEN
+	DO;
+		CALL HB1C9; STRING '(';
+		IF ^.O THEN
+		DO;
+			CALL HCF3B;
+			CALL HCF17;
+			CALL HC46C;
+			BRK;
+			CALL HB119;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HCCE1;
+			IF ^.O THEN
+			DO;
+				CALL HCEE2;
+				CALL HCEE9;
+				CALL HB21E; STRING '%';
+			END;
+		END;
+
+		BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+		HB9B5:
+		IF ^.O THEN
+		DO;
+			CALL HB1C9; STRING ')';
+			IF ^.O THEN
+			DO;
+				CALL HB21E; STRING 'STA R1';
+				CALL HB21E; STRING 'PLA';
+				CALL HCEE2;
+				CALL HCEE9;
+				CALL HB21E; STRING 'R1';
+			END;
+
+			GOTO HB9B5;
+		END;
+
+		CLR .O;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Traitement des affectations";
+" -----------------------------------------------------------------------------";
+
+ HB9DC:
+	CALL HBA55;
+	IF ^.O THEN
+	DO;
+		CALL HB468; STRING '(R3),Y';
+		CALL HCFA0;
+		CALL HBC56;
+		BRK;
+		RETURN;
+	END;
+
+
+" Indirection page zéro à gauche";
+	CALL HBA8B;
+	IF ^.O THEN
+	DO;
+		CALL HBC56;
+		BRK;
+		RETURN;
+	END;
+
+
+" Identifiant";
+"HB9FB:";
+	GOTO RegReg_Patch;
+	"IF ^.O THEN RETURN;";
+
+ HB9FE:
+	CALL HB375;
+	IF ^.O THEN
+	DO;
+		CALL HCFA5;
+		CALL HB1C9; STRING '==';
+		IF ^.O THEN
+		DO;
+			CALL HCEC4;
+			CALL HBC44;
+			BRK;
+			CALL HBD65;
+			BRK;
+		END;
+
+		IF .O THEN
+		DO;
+			"Patch id = .reg";
+			" [ -------------------";
+			" TODO: Ré-écrire le patch pour pouvoir faire un CALL id_reg_Patch";
+			" au lieu du GOTO";
+			"CALL HBAA9;";
+			GOTO id_reg_Patch;
+			"Le label suivant est utilisé par le patch id_reg";
+			HBA1A:
+			" ------------------- ]";
+
+			IF ^.O THEN
+			DO;
+				CALL HB1C9; STRING ';';
+				BRK;
+			END;
+
+			IF .O THEN
+			DO;
+				CALL HBBD1;
+				IF ^.O THEN
+				DO;
+					CALL HB1C9; STRING ';';
+					BRK;
+				END;
+
+				IF .O THEN
+				DO;
+					CALL HBC8C;
+					IF ^.O THEN DO; END;
+
+					IF .O THEN
+					DO;
+						CALL HBC1F;
+						IF ^.O THEN DO; END;
+
+						IF .O THEN
+						DO;
+							CALL HBC30;
+							IF ^.O THEN
+							DO;
+								CALL HB1C9; STRING ';';
+								BRK;
+							END;
+
+							IF .O THEN
+							DO;
+								CALL HBD43;
+								IF ^.O THEN
+								DO;
+									"Le label suivant est utilisé par le patch id=.reg";
+									HBA4E:
+									CALL HB1C9; STRING ';';
+									BRK;
+								END;
+							END;
+						END;
+					END;
+				END;
+			END;
+		END;
+ HBA53: "HBA53:";
+		BRK;
+	END;
+	RETURN;
+
+
+" Indirection (@) (à gauche de l'affectation)";
+
+" 'LDA <identifiant>\nSTA R3\nLDA <identifiant>+1\nSTA R3+1'";
+
+ HBA55:
+	CALL HB1C9; STRING '@';
+	IF ^.O THEN
+	DO;
+		CALL HCEC4;
+		CALL HC9BD;
+		IF ^.O THEN
+		DO;
+			CALL HC489;
+			BRK;
+			CALL HCF17;
+			CALL HB577;
+			CALL HCF78;
+			CALL HCF53;
+			CALL HB21E; STRING 'R3';
+			CALL HCF17;
+			CALL HCEDB;
+			CALL HCF53;
+			CALL HB21E; STRING 'R3+1';
+		END;
+
+		BRK;
+		CLR .O;
+	END;
+
+	RETURN;
+
+" Indirection page zéro (&)? (A gauche de l'affectation)";
+
+" '(<id>)Y'";
+
+ HBA8B:
+	CALL HB1C9; STRING '&';
+	IF ^.O THEN
+	DO;
+		CALL HCEC4;
+		CALL HB468; STRING '(';
+		CALL HC902;
+		BRK;
+		CALL HB468; STRING '),Y';
+		CALL HCFA0;
+		CALL HC489;
+		BRK;
+	END;
+
+	RETURN;
+
+
+" Affectation '=', '=##'";
+
+ HBAA9:
+	CALL HB1C9; STRING '=';
+"Le label suivant est utilisé par le patch id=.reg";
+ HBAAD:
+	IF ^.O THEN
+	DO;
+		CALL HCEC4;
+		CALL HB1C9; STRING '##';
+		IF ^.O THEN
+		DO;
+			CALL HBB99;
+			BRK;
+			CALL HCF53;
+			CALL HCEDB;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HBC74;
+			IF ^.O THEN DO; END;
+			IF .O THEN
+			DO;
+				CALL HBB2F;
+				IF ^.O THEN
+				DO;
+					CALL HC174;
+					BRK;
+				END;
+
+				IF .O THEN
+				DO;
+					CALL HBB5E;
+					IF ^.O THEN
+					DO;
+						CALL HC174;
+						BRK;
+					END;
+				END;
+			END;
+		END;
+
+		BRK;
+	END;
+
+	RETURN;
+
+
+" 'LDA dup(H02A1)\nSTA R0\nLDA pop(H02A1)+1\nSTA R0+1\n'";
+
+ HBAE2:
+	CALL HCF17;
+	CALL HB577;
+	CALL HCF78;
+	CALL HCF6C;
+	CALL HCF17;
+	CALL HCEDB;
+	CALL HCF63;
+	CALL HCF42;
+	RETURN;
+
+
+" '[n]' (à droite de l'affectation, l'index sera le registre Y)";
+
+" Sauvegarde Y dans R2 avant le calcul de l'index";
+
+ HBAFB:
+	CALL HB1C9; STRING '[';
+	IF ^.O THEN
+	DO;
+		CALL HB21E; STRING 'STY R2';
+		CALL HC130;
+		BRK;
+		CALL HB1C9; STRING ']';
+		BRK;
+	END;
+
+	RETURN;
+
+
+" OUT 'LDA (R0)Y \nLDY R2\n'";
+
+ HBB14:
+	CALL HB21E; STRING 'LDA (R0),Y';
+	CALL HBB25;
+	BRK;
+	RETURN;
+
+
+" OUT 'LDY R2'";
+
+ HBB25:
+	CALL HB21E; STRING 'LDY R2';
+	RETURN;
+
+
+" Indirection (@) (à droite de l'affectation)";
+
+ HBB2F:
+	CALL HB1C9; STRING '@';
+	IF ^.O THEN
+	DO;
+		CALL HC9BD;
+		BRK;
+		CALL HBAFB;
+		IF ^.O THEN
+		DO;
+			CALL HBAE2;
+			BRK;
+			CALL HBB14;
+			BRK;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HCF31;
+			CALL HBAE2;
+			BRK;
+			CALL HB21E; STRING 'LDA (R0,X)';
+		END;
+
+		BRK;
+	END;
+
+	RETURN;
+
+" Indirection page zéro (&)? (A droite de l'affectation)";
+
+ HBB5E:
+	CALL HB1C9; STRING '&';
+	IF ^.O THEN
+	DO;
+		CALL HC9BD;
+		BRK;
+		CALL HBAFB;
+		IF ^.O THEN
+		DO;
+			CALL HB225; STRING 'LDA (';
+			CALL HCEE9;
+			CALL HB21E; STRING '),Y';
+			CALL HBB25;
+			BRK;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HCF31;
+			CALL HB225; STRING 'LDA (';
+			CALL HCEE9;
+			CALL HB21E; STRING ',X)';
+		END;
+
+		BRK;
+	END;
+
+	RETURN;
+
+
+
+ HBB99:
+	CALL HC9BD;
+	IF ^.O  THEN
+	DO;
+		CALL HB225; STRING 'LDA #<';
+		CALL HBBB8;
+		BRK;
+		CALL HB225; STRING 'LDA #>';
+		CALL HCEE2;
+	END;
+
+	RETURN;
+
+
+
+
+" Affiche:";
+"       H0400 + Label0";
+"       STA Label1";
+
+" Entrée:";
+"       H02A1: [Label0, Label1, ...]";
+"	       +--> Sommet";
+
+" Sortie:";
+"       H02A1: Inchangé";
+
+
+ HBBB8:
+	CALL HB577; "H0200 = TOP(H02A1)";
+	CALL HCF78; "H0400 += H0200 & DISP(H0400)";
+
+	"Place 'STA ' dans H0400";
+	CALL HCF53; "OUT2 'STA '";
+
+	"Sauvegarde le sommet de H02A1 en H0250";
+	CALL HB57E; "H0200 = POP(H02A1)";
+	CALL HCF93; "H0250 = H0200";
+
+
+	CALL HB577; "H0200 = TOP(H02A1)";
+	CALL HCF78; "H0400 += H0200 & DISP(H0400)";
+
+	"Restaure le sommet de H02A1";
+	CALL HCFA0; "PUSH(H02A1,H0250)";
+
+	RETURN;
+
+
+" '[exp1]==', '[exp1]=##', '[exp1]=', '[exp1].exp2==', '[exp1].exp2=##', '[exp1].exp2='";
+
+ HBBD1:
+	CALL HB1C9; STRING '[';
+	IF ^.O THEN
+	DO;
+		CALL HCEC4;
+		CALL HC112;
+		IF ^.O THEN
+		DO;
+			CALL HB1C9; STRING ']';
+			BRK;
+			CALL HB1C9; STRING '.';
+			IF ^.O THEN
+			DO;
+				CALL HC17D;
+				BRK;
+			END;
+
+			IF .O THEN
+			DO;
+				CALL HB1C9; STRING '==';
+				IF ^.O THEN
+				DO;
+					CALL HBD65;
+					BRK;
+				END;
+
+				IF .O THEN
+				DO;
+					CALL HB1C9; STRING '=##';
+					IF ^.O THEN
+					DO;
+						CALL HBB99;
+						BRK;
+						CALL HB21E; STRING 'INY';
+						CALL HCF53;
+						CALL HCEE2;
+					END;
+
+					IF .O THEN
+					DO;
+						CALL HBAA9;
+						IF ^.O THEN DO; END;  " BVS *+2; Pourquoi?";
+					END;
+				END;
+			END;
+			BRK;
+		END;
+		BRK;
+	END;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Déclaration d'un label + traitement d'une instruction";
+" -----------------------------------------------------------------------------";
+
+ HBC1F:
+	CALL HB1C9; STRING ':';
+	IF ^.O THEN
+	DO;
+		CALL HCEC4;
+		CALL HCEE2;
+		CALL HCC67;
+		BRK;
+	END;
+
+	RETURN;
+
+
+ HBC30:
+	CALL HB1C9; STRING '.';
+	IF ^.O THEN
+	DO;
+		CALL HCEC4;
+		CALL HBC44;
+		IF ^.O THEN
+		DO;
+			CALL HC17D;
+			BRK;
+		END;
+		BRK;
+	END;
+	RETURN;
+
+
+HBC44:
+	CALL HCF27;
+	CALL HB57E;
+	CALL HCF93;
+	CALL HB468; STRING ',Y';
+	CALL HCFA0;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Affectation '= val', '= <id>'";
+" -----------------------------------------------------------------------------";
+
+ HBC56:
+	CALL HB1C9; STRING '=';
+	IF ^.O THEN
+	DO;
+		CALL HCEC4;
+		CALL HBB2F;
+		IF .O THEN CALL HBB5E;
+		IF ^.O THEN
+		DO;
+			CALL HC174;
+			BRK;
+		END;
+		IF .O THEN CALL HBC74;
+		BRK;
+	END;
+	RETURN;
+
+ HBC74:
+	CALL HCCE1;
+	IF ^.O THEN
+	DO;
+		CALL HCFA0;
+		CALL HCCD1;
+		IF ^.O THEN
+		DO;
+			CALL HC16C;
+			BRK;
+		END;
+		IF .O THEN CALL HC16C;
+		BRK;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instructions '+', '-', '.AND', '.OR', '.EOR'";
+" -----------------------------------------------------------------------------";
+ HBC8C:
+	CALL HB1C9; STRING '+';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCEC4;
+		CALL HCE9A;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF07;
+			CALL HCEE2;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			CALL HBD2D;
+			IF ^.O THEN
+			BEGIN;
+				CALL HB21E; STRING 'CLC';
+				CALL HB225; STRING 'ADC ';
+				CALL HBD3A;
+				BRK;
+			END;
+		END;
+
+		BRK;
+		RETURN;
+	END;
+
+	CALL HB1C9; STRING '-';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCEC4;
+		CALL HCE9A;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCEFF;
+			CALL HCEE2;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			CALL HBD2D;
+			IF ^.O THEN
+			BEGIN;
+				CALL HB21E; STRING 'SEC';
+				CALL HB225; STRING 'SBC ';
+				CALL HBD3A;
+				BRK;
+			END;
+		END;
+
+		BRK;
+		RETURN;
+	END;
+
+
+ HBCE8:
+	CALL HCE8A;
+	IF ^.O THEN
+	BEGIN;
+		CALL HBD2D;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB225; STRING 'AND ';
+			CALL HBD3A;
+			BRK;
+		END;
+
+		BRK;
+		RETURN;
+	END;
+
+ HBCFF:
+	CALL HCEA0;
+	IF ^.O THEN
+	BEGIN;
+		CALL HBD2D;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB225; STRING 'ORA ';
+			CALL HBD3A;
+			BRK;
+		END;
+
+		BRK;
+		RETURN;
+	END;
+
+ HBD16:
+	CALL HCEA7;
+	IF ^.O THEN
+	BEGIN;
+		CALL HBD2D;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB225; STRING 'EOR ';
+			CALL HBD3A;
+			BRK;
+		END;
+
+		BRK;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" Z04:=$FF, 'LDA pop(H02A1)\n'";
+" -----------------------------------------------------------------------------";
+
+ HBD2D:
+	CALL HCEC4;
+	CALL HCF17;
+	CALL HB577;
+	CALL HCF78;
+	RETURN;
+
+
+ HBD3A:
+	CALL HC480;
+	IF ^.O THEN CALL HCEF0;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction '<-'";
+
+" <id1> <- <id2>";
+" <id1> <- # <id2>";
+" <id1> <- #< <id2>";
+" <id1> <- #> <id2>";
+" -----------------------------------------------------------------------------";
+
+ HBD43:
+	CALL HB1C9; STRING '<-';
+	IF ^.O THEN
+	DO;
+		"CALL HCEC4;";
+
+	"-----------------------------------------------------------------------------";
+	" Patch: ";
+	"id <- .AX;";
+	"id <- .AY;";
+	"id <- .XA;";
+	"id <- .YA;";
+	"id <- .XY;";
+	"id <- .YX;";
+	"-----------------------------------------------------------------------------";
+		CALL HCEC4;
+	 AX_:
+		CALL HREGAX;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF53;
+			IFF ^.O THEN YX_X;
+		END;
+
+	 AY_:
+		CALL HREGAY;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF53;
+	 AY_Y:
+			CALL HB577;
+			CALL HCF78;
+			CALL OUT_STY;
+			IFF ^.O THEN Store_End;
+		END;
+
+	 XA_:
+		CALL HREGXA;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STX;
+	 XA_A:
+			CALL HB577;
+			CALL HCF78;
+			CALL HCF53;
+			IFF ^.O THEN Store_End;
+		END;
+
+	 XY_:
+		CALL HREGXY;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STX;
+			IFF ^.O THEN AY_Y;
+		END;
+
+	 YA_:
+		CALL HREGYA;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STY;
+			IFF ^.O THEN XA_A;
+		END;
+
+	 YX_:
+		CALL HREGYX;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STY;
+	 YX_X:
+			CALL HB577;
+			CALL HCF78;
+			CALL OUT_STX;
+	 Store_End:
+		GOTO HCEDB;
+		END;
+
+	 Store_Suite:
+		CLEAR .O;
+	"-----------------------------------------------------------------------------";
+
+		CALL HC9BD;
+		BRK;
+		CALL HCF17;
+		CALL HBBB8;
+		BRK;
+		CALL HCF17;
+		CALL HCEDB;
+		CALL HCF53;
+		CALL HCEDB;
+	END;
+	RETURN;
+
+
+
+
+ HBD65:
+	CALL HB21E;
+	STRING 'LDA #2';
+
+	CALL HCF6C;
+	CALL HC193;
+	BRK;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Bloc 'BEGIN;' / 'DO;' ...'END;'";
+" -----------------------------------------------------------------------------";
+
+ HBD76:
+	CALL HB1C9; STRING 'BEGIN;';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING 'DO;';
+	END;
+
+	IF ^.O THEN
+	DO;
+		CALL HBD8E;
+		BRK;
+	END;
+
+	RETURN;
+
+ HBD8E:
+	CALL HBDA5;
+	IF ^.O THEN  RETURN;
+
+	CALL HB0C8;
+	CALL HB2A6; STRING ';';
+	CALL HB1C9; STRING ';';
+	BRK;
+	CALL HBD8E;
+	BRK;
+	RETURN;
+
+ "Pour la boucle suivante,il faudrait WHILE .flag";
+ HBDA5:
+	IF ^.O THEN
+	DO;
+		CALL HCC67;
+		GOTO HBDA5;
+	END;
+
+	CLR .O;
+	CALL HB1C9; STRING 'END;';
+	BRK;
+	CALL HB57E;
+	RETURN;
+
+" Instruction 'END;'";
+" -----------------------------------------------------------------------------";
+"				Instructions 'GOTO ', 'CALL '";
+" -----------------------------------------------------------------------------";
+
+ HBDBA:
+	"Alias GOTO/GO TO";
+	CALL HGOTO;
+	IF ^.O THEN
+	DO;
+		CALL HCCEB;
+		BRK;
+		RETURN;
+	END;
+
+	"Alias CASE []";
+	CALL HB1C9; STRING 'CASE ';
+	IF ^.O THEN
+	DO;
+		CALL HB1C9; STRING '[';
+		IF ^.O THEN CALL HCD07;
+		BRK;
+		RETURN;
+	END;
+
+	CALL HB1C9; STRING 'CALL ';
+	IF ^.O THEN
+	DO;
+		CALL HB225; STRING 'JSR ';
+		CALL HC441;
+		BRK;
+		CALL HB119;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'BRK;'";
+" -----------------------------------------------------------------------------";
+
+ HBDE2:
+	CALL HB1C9; STRING 'BRK;';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING 'BREAK;';
+	END;
+
+	IF ^.O THEN
+	DO;
+		CALL HB21E; STRING 'BRK ';
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'IF'";
+" -----------------------------------------------------------------------------";
+
+ HBDF3:
+	CALL HB1C9; STRING 'IF ';
+	IF ^.O THEN
+	DO;
+		" Call déplacé dans le patch";
+		"CALL HCCE1;";
+
+		"Label suivant pour le patch, à supprimer apres intégration du";
+		" patch IF ici";
+		GOTO IF_Patch;
+		HBDFE:
+
+		IF ^.O THEN
+		DO;
+			CALL HCFA0;
+			CALL HC69B;
+			IF ^.O THEN DO; END;
+			IF .O THEN
+			DO;
+				CALL HC6B6;
+				IF ^.O THEN DO; END;
+			END;
+
+			BRK;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HBA55;
+			IF ^.O THEN
+			DO;
+				CALL HB4C4; STRING '(R3),Y';
+			END;
+
+			IF .O THEN CALL HBA8B;
+			IF ^.O THEN
+			DO;
+				CALL HC7FE;
+				BRK;
+			END;
+		END;
+
+		"Le label suivant pour le patch IF";
+		HBE2A:
+		BRK;
+		CALL HC5D8;
+		BRK;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'assembler code'";
+" -----------------------------------------------------------------------------";
+
+ HBE30:
+	"Patch CODE '';";
+	"TODO: A modifier? 'CODE ' sans rien derrière ne génère pas d'erreur...";
+	CALL HB1C9; STRING 'CODE ';
+	CLR .O;
+
+	CALL HBE3F;
+	IF ^.O THEN
+	DO;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+		HBE35:
+		IF ^.O THEN
+		DO;
+			CALL HBE3F;
+			GOTO HBE35;
+		END;
+		CLR .O;
+	END;
+	RETURN;
+
+ HBE3F:
+	CALL HB313;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF78;
+		CALL HB1C9; STRING '''';
+		BRK;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Traitement commentaire: ''xxxxx''";
+" -----------------------------------------------------------------------------";
+
+ HBE4D:
+	CALL HB1C9; STRING '"';
+	IF ^.O THEN
+	DO;
+		CALL HB2A6; STRING '"';
+		CALL HB1C9; STRING '"';
+		BRK;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Traitement instructions 'STACK ', 'UNSTACK ', 'SHL ', 'SHR ', 'INC ', 'DEC ', 'INCW ', 'DECW ', 'ROL ', 'ROR ', Code assembleur";
+" -----------------------------------------------------------------------------";
+
+ HBE5D:
+	CALL HCC14; IF ^.O THEN RETURN;
+	CALL HCD90; IF ^.O THEN RETURN;
+	CALL HCB70; IF ^.O THEN RETURN;
+	CALL HC60E; IF ^.O THEN RETURN;
+	CALL HC8B4; IF ^.O THEN RETURN;
+	CALL HBE30;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instructions 'BYTE', 'WORD', 'CHAR', '['";
+" -----------------------------------------------------------------------------";
+" BYTE?";
+
+ HBE7F:
+	CALL HB1C9; STRING 'BYTE';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCE92;
+		IF ^.O THEN
+		BEGIN;
+			"BYTE INIT[n];";
+			CALL HCEC9;
+			CALL HB1C9; STRING '[';
+			BRK;
+			CALL HC46C;
+			BRK;
+			CALL HB119;
+			CALL HB1C9; STRING ']';
+			BRK;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			CALL HB1C9; STRING '[';
+			IF ^.O THEN
+			BEGIN;
+				"BYTE [n]";
+				CALL HB225; STRING ' *=*+';
+				CALL HC46C;
+				BRK;
+				CALL HB119;
+				CALL HB1C9; STRING ']';
+				BRK;
+			END;
+
+			IF .O THEN
+			BEGIN;
+				"Initialisation par défaut à 0 (pour DCL <id> BYTE)";
+				CALL HCEC9;
+				CALL HCF7F;
+			END;
+		END;
+
+		BRK;
+		RETURN;
+	END;
+
+" WORD?";
+	CALL HB1C9; STRING 'WORD';
+	IF ^.O THEN
+	BEGIN;
+		CALL HBF30;
+		BRK;
+		RETURN;
+	END;
+
+
+" CHAR?";
+	CALL HB1C9; STRING 'CHARACTER';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING 'CHAR';
+	END;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCE92;
+		IF ^.O THEN
+		BEGIN;
+			"CHAR INIT['str']";
+			CALL HB1C9; STRING '[';
+			BRK;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			CALL HB1C9; STRING '[';
+		END;
+
+		IF ^.O THEN
+		BEGIN;
+			"CHAR INIT ['str'] ou CHAR ['str']";
+			CALL HCEC9;
+			CALL HCF4E;
+			CALL HB313;
+			BRK;
+			CALL HCF73;
+			CALL HCF4E;
+			CALL HB119;
+			CALL HB1C9; STRING '''';
+			BRK;
+			CALL HB1C9; STRING ']';
+			BRK;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			" Taille par défaut: 1 octet non initialisé";
+			CLR .O;
+			CALL HCF1F;
+			CALL HCF42;
+		END;
+
+		BRK;
+		RETURN;
+	END;
+
+" [n]?";
+	CALL HB1C9; STRING '[';
+	IF ^.O THEN
+	BEGIN;
+		CALL HC7E8;
+		BRK;
+		CALL HB1C9; STRING ']';
+		BRK;
+		RETURN;
+	END;
+
+" Déclaration d'un octet par défaut";
+	CLR .O;
+	CALL HCF1F;
+	CALL HCF42;
+	RETURN;
+
+" Déclaration pour 'WORD'";
+ HBF30:
+	CALL HCE92;
+	IF ^.O THEN
+	BEGIN;
+		"WORD INIT[id|val]";
+		CALL HCED2;
+		CALL HB1C9; STRING '[';
+		BRK;
+		CALL HC46C;
+		BRK;
+		CALL HB1C9; STRING ']';
+		BRK;
+		CALL HB119;
+	END;
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '[';
+		IF ^.O THEN
+		BEGIN;
+			"WORD [val]";
+			CALL HC7E8;
+			BRK;
+			CALL HCF78;
+			CALL HB1C9; STRING ']';
+			BRK;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			"Taille par défaut: 2 octets";
+			CLR .O;
+			CALL HCF1F;
+			CALL HCF48;
+		END;
+	END;
+
+	RETURN;
+
+" liste '<identifiant> [BYTE|WORD|CHAR|\[] xxx'";
+
+" Utilisé uniquement depuis la routine HBF85 (Instruction 'DCL')";
+
+ HBF67:
+	CALL HC441;
+	IF ^.O THEN
+	BEGIN;
+		CALL HBE7F;
+		BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+ HBF70:
+		IF ^.O THEN
+		BEGIN;
+			CALL HB1C9; STRING ',';
+			IF ^.O THEN
+			BEGIN;
+				CALL HC441;
+				BRK;
+				CALL HBE7F;
+				BRK;
+			END;
+
+			GOTO HBF70;
+		END;
+
+		CLR .O;
+	END;
+
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+"				Traitement instructions 'DCL ', 'DEF ', 'DATA ', 'DATAW ', ''xxxxx''";
+" -----------------------------------------------------------------------------";
+
+ HBF85:
+	CALL HB1C9; STRING 'DCL ';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING 'DECLARE ';
+	END;
+	IF ^.O THEN
+	BEGIN;
+		CALL HBF67;
+		BRK;
+		CALL HB1C9; STRING ';';
+		BRK;
+		RETURN;
+	END;
+
+" 'DEF '";
+	CALL HB1C9; STRING 'DEF ';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING 'DEFINE ';
+	END;
+	IF ^.O THEN
+	BEGIN;
+		CALL HC01A;
+		BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+ HBFA5:
+		IF ^.O THEN
+		BEGIN;
+			CALL HB1C9; STRING ',';
+			IF ^.O THEN
+			BEGIN;
+				CALL HC01A;
+				BRK;
+			END;
+
+			GOTO HBFA5;
+		END;
+
+		CLR .O;
+		CALL HB1C9; STRING ';';
+		BRK;
+		RETURN;
+	END;
+
+ "'DATA '";
+	CALL HB1C9; STRING 'DATA ';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCEC9;
+		CALL HC06E;
+		BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+ HBFCC:
+		IF ^.O THEN
+		BEGIN;
+			CALL HB1C9; STRING ',';
+			IF ^.O THEN
+			BEGIN;
+				CALL HCF73;
+				CALL HC06E;
+				BRK;
+			END;
+
+			GOTO HBFCC;
+		END;
+
+		CLR .O;
+		CALL HB1C9; STRING ';';
+		BRK;
+		CALL HB119;
+		RETURN;
+	END;
+
+ "'DATAW '";
+	CALL HB1C9; STRING 'DATAW ';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCED2;
+		CALL HC086;
+		BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+ HBFFA:
+		IF ^.O THEN
+		BEGIN;
+			CALL HB1C9; STRING ',';
+			IF ^.O THEN
+			BEGIN;
+				CALL HCF73;
+				CALL HC086;
+				BRK;
+			END;
+
+			GOTO HBFFA;
+		END;
+
+		CLR .O;
+		CALL HB1C9; STRING ';';
+		BRK;
+		CALL HB119;
+		RETURN;
+	END;
+
+ "Commentaire";
+	CALL HBE4D;
+	RETURN;
+
+" Traitement instruction 'DEF '";
+" 'DEF <id> = <expr>'";
+" 'DEF * = <expr>'";
+
+ HC01A:
+	CALL HC441;
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '*';
+		IF ^.O THEN CALL HCF73;
+	END;
+
+	IF ^.O THEN
+	BEGIN;
+		CALL HB1C9; STRING '=';
+		BRK;
+		CALL HCF73;
+		CALL HC03A;
+		BRK;
+		CALL HB119;
+	END;
+
+	RETURN;
+
+
+ HC03A:
+	CALL HC05E;
+	IF .O THEN
+	BEGIN;
+		CALL HC46C;
+		IF .O THEN
+		BEGIN;
+			CALL HB1C9; STRING '*';
+			IF ^.O THEN CALL HCF73;
+		END;
+	END;
+
+	IF ^.O  THEN
+	BEGIN;
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+ HC04F:
+		IF ^.O THEN
+		BEGIN;
+			CALL HC05E;
+			IF .O THEN CALL HC46C;
+			GOTO HC04F;
+		END;
+
+		CLR .O;
+	END;
+
+	RETURN;
+
+" '+' ou '-'";
+
+ HC05E:
+	CALL HB1C9; STRING '+';
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '-';
+	END;
+
+	IF ^.O THEN CALL HCF73;
+	RETURN;
+
+" Traitement 'DATA '";
+
+ HC06E:
+	CALL HB313;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF4E;
+		CALL HCF73;
+		CALL HCF4E;
+		CALL HB1C9; STRING '''';
+		BRK;
+		RETURN;
+	END;
+
+	CALL HC086;
+	RETURN;
+
+" Traitement 'DATAW '";
+
+ HC086:
+	CALL HB1C9; STRING '<';
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '>';
+	END;
+
+	IF ^.O THEN CALL HCF73;
+	IF .O THEN CLR .O;
+
+	IF ^.O THEN
+	BEGIN;
+		CALL HC46C;
+		BRK;
+		CALL HC03A;
+		IF .O THEN CLR .O;
+		BRK;
+	END;
+
+	RETURN;
+
+
+" Appelé uniquement depuis la routine en HC17D";
+" 'LDA pop(H02A1)' + boucle de compilation d'une expression + 'STA R0'";
+
+ HC0A6:
+	CALL HCAF3;
+	CALL HB97A;
+	BRK;
+	CALL HCF6C;
+	RETURN;
+
+" OUT 'INX\nINY\nDEC R0\n' OUT2 'BNE '";
+
+ HC0B1:
+	CALL HB21E; STRING 'INX';
+	CALL HC0BC;
+	BRK;
+	RETURN;
+
+" OUT 'INY\nDEC R0\n' OUT2 'BNE '";
+
+ HC0BC:
+	CALL HB21E; STRING 'INY';
+	CALL HB21E; STRING 'DEC R0 ';
+	CALL HB225; STRING 'BNE ';
+	RETURN;
+
+
+
+
+ HC0D4:
+	CALL HCF0F;
+	CALL HCEBD;
+	CALL HB119;
+	CALL HCEAF;
+	CALL HCEBD;
+	CALL HCEC9;
+	CALL HCF4E;
+	CALL HCEE9;
+	CALL HCF4E;
+	CALL HB119;
+	CALL HCFA0;
+	CALL HCEE9;
+	CALL HCF93;
+	RETURN;
+
+
+" décimal positif?";
+" push(H02A1,H0250 + '<val>+' + pop(H02A1))";
+
+ HC0FC:
+	CALL HB3FF;
+	IF ^.O THEN
+	DO;
+		CALL HCF93;
+		CALL HB468; STRING '+';
+		CALL HB57E;
+		CALL HCF93;
+		CALL HCFA0;
+	END;
+
+	RETURN;
+
+
+
+ HC112:
+	CALL HC0FC;
+	IF ^.O THEN RETURN;
+
+	CALL HC11C;
+	RETURN;
+
+
+
+
+ HC11C:
+	CALL HC130;
+	IF ^.O THEN
+	DO;
+		CALL HB57E;
+		CALL HCF93;
+		CALL HB468; STRING ',Y';
+		CALL HCFA0;
+	END;
+
+	RETURN;
+
+
+" Compile une expression avec transfert du résultat final dans le registre Y";
+
+" OUT2 'LDA <id>|<val>\n<expr>\nTAY'";
+
+
+ HC130:
+	CALL HCF17;
+	CALL HC480;
+	BRK;
+	CALL HB97A;
+	BRK;
+	CALL HB21E; STRING 'TAY';
+	RETURN;
+
+
+" Si valeur décimale positive -> push(H02A1,H0250 + '<val>+' + pop(H02A1))";
+" sinon -> compile une expression avec résultat dans X ( OUT2 'LDA <id>|<val>\n<expr>\nTAX\n' & push(H02A1,H0250 + pop(H02A1) + ',X') )";
+
+ HC142:
+	CALL HC0FC;
+	IF ^.O THEN  RETURN;
+
+	CALL HC14C;
+	RETURN;
+
+
+
+" Compile une expression avec transfert du résultat final dans le registre X";
+
+" OUT2 'LDA <id>|<val>\n<expr>\nTAX\n' & push(H02A1,H0250 + pop(H02A1) + ',X')";
+
+
+ HC14C:
+	CALL HCF17;
+	CALL HC480;
+	BRK;
+	CALL HB97A;
+	BRK;
+	CALL HB21E; STRING 'TAX';
+	CALL HB57E;
+	CALL HCF93;
+	CALL HB468; STRING ',X';
+	CALL HCFA0;
+	RETURN;
+
+
+" 'LDA pop(H02A1)' + boucle de compilation d'une expression + 'STA pop(H02A1)'";
+
+ HC16C:
+	CALL HCAF3;
+	CALL HC174;
+	BRK;
+	RETURN;
+
+
+" Boucle de compilation d'une expression + 'STA pop(H02A1)'";
+
+ HC174:
+	CALL HB97A;
+	IF ^.O THEN  CALL HCEF0;
+
+	RETURN;
+
+
+
+ HC17D:
+	CALL HCCE1;
+	IF ^.O THEN
+	DO;
+		CALL HCFA0;
+		CALL HC0A6;
+		BRK;
+		CALL HB1C9; STRING '=';
+		BRK;
+		CALL HC193;
+		BRK;
+	END;
+
+	RETURN;
+
+
+
+ HC193:
+	CALL HC902;
+	IF ^.O THEN
+	DO;
+		CALL HCFA0;
+		CALL HCCD1;
+		IF ^.O THEN
+		DO;
+			CALL HCEBD;
+			CALL HCAF3;
+			CALL HCEF0;
+			CALL HC0B1;
+			BRK;
+			CALL HCEB6;
+			CALL HB119;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HCF31;
+			CALL HC74E;
+			IF .O THEN
+			DO;
+				CALL HB468; STRING ';';
+			END;
+
+			BRK;
+			CALL HCEBD;
+			CALL HCB1D;
+			CALL HB21E; STRING '%';
+			CALL HCF53;
+			CALL HCEE2;
+			CALL HC0B1;
+			BRK;
+			CALL HCEB6;
+			CALL HB119;
+		END;
+	HC1DC:
+		BRK;
+	END;
+
+	IF .O THEN
+	DO;
+		CALL HB313;
+		IF ^.O THEN
+		DO;
+			CALL HCFA5;
+			CALL HCF31;
+			CALL HC0D4;
+			BRK;
+			CALL HCF17;
+			CALL HCEB6;
+			CALL HB21E; STRING ',X';
+			CALL HCEF0;
+			CALL HC0B1;
+			BRK;
+			CALL HCFA0;
+			CALL HCEE2;
+			CALL HB1C9; STRING '''';
+			BRK;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HC8E3;
+			IF ^.O THEN
+			DO;
+				CALL HCFA0;
+				CALL HCAF3;
+				CALL HCEBD;
+				CALL HCEF0;
+				CALL HC0BC;
+				BRK;
+				CALL HCEB6;
+				CALL HB119;
+			END;
+		END;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'EXIT;'";
+" -----------------------------------------------------------------------------";
+
+ HC229:
+	CALL HB1C9; STRING 'EXIT;';
+	IF ^.O THEN
+	DO;
+		CALL HB21E; STRING '.END';
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"			Instructions '.DFILE ' / '.TFILE'";
+" -----------------------------------------------------------------------------";
+
+ HC23B:
+	CALL HB1C9; STRING '.DFILE ';
+	IF ^.O THEN
+	DO;
+		CALL HB611;
+		CALL HB1C9; STRING ';';
+		BRK;
+		RETURN;
+	END;
+
+	CALL HB1C9; STRING '.TFILE ';
+	IF ^.O THEN
+	DO;
+		CALL HB651;
+		CALL HB1C9; STRING ';';
+		BRK;
+	END;
+
+	RETURN;
+
+
+" Instruction '.TFILE'";
+
+" -----------------------------------------------------------------------------";
+"		Instruction bloc 'FOR xxx TO yyy [BY zzz]'";
+" -----------------------------------------------------------------------------";
+
+HC265:
+	CALL HB1C9; STRING 'FOR ';
+	IF .O THEN GOTO HC31C;
+
+	"Instruction 'TO' xxx ['BY' yyy]";
+	CALL HC9BD;
+	BRK;
+	CALL HBC56;
+	BRK;
+	CALL HCF93;
+	CALL HCFA0;
+	CALL HCEBD;
+	CALL HCEAF;
+	CALL HB57E;
+	CALL HCFA0;
+	CALL HCFA5;
+	CALL HB1C9; STRING 'TO';
+	BRK;
+	CALL HCEF7;
+	CALL HC480;
+	BRK;
+	CALL HB21E; STRING 'BEQ *+7';
+	CALL HB21E; STRING 'BCC *+5';
+	CALL HCF0F;
+	CALL HCEBD;
+	CALL HCEAF;
+	CALL HCFA0;
+	CALL HC6FB;
+	BRK;
+
+	CALL HB1C9; STRING 'BY';
+
+	IF ^.O THEN
+	BEGIN;
+		CALL HCCE1;
+		BRK;
+		CALL HCFA0;
+		CALL HCC67;
+		BRK;
+		CALL HCF17;
+		CALL HCEE2;
+		CALL HB57E;
+		CALL HCF93;
+		CALL HB21E; STRING 'CLC';
+		CALL HB225; STRING 'ADC ';
+		CALL HCEE2;
+		CALL HCF53;
+		CALL HCF78;
+	END;
+
+	IF .O THEN
+	BEGIN;
+		CLR .O;
+		CALL HCC67;
+		BRK;
+		CALL HCF07;
+		CALL HB57E;
+		CALL HCF93;
+		CALL HB577;
+		CALL HCF78;
+		CALL HCF17;
+		CALL HCEE2;
+	END;
+
+	BRK;
+	CALL HCF0F;
+	CALL HCEE2;
+	CALL HCFA0;
+	CALL HCEE2;
+
+ HC31C:
+	RETURN;
+
+
+" Multiple byte comparaison";
+" Compile quantificateur + test ('=' <expr>, '^=' <expr>)";
+
+ HC31D:
+	CALL HC556;
+	IF ^.O THEN
+	DO;
+		CALL HC327;
+		BRK;
+	END;
+
+	RETURN;
+
+
+" Instructions '=', '^='";
+
+ HC327:
+	CALL HB1C9; STRING '=';
+	IF ^.O THEN
+	DO;
+		CALL HCF98;
+		CALL HC398;
+		IF ^.O THEN
+		DO;
+			CALL HC569;
+			BRK;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HB375;
+			IF ^.O THEN
+			DO;
+				CALL HCF93;
+				CALL HCFA0;
+				CALL HCCD1;
+				IF ^.O THEN
+				DO;
+					CALL HC569;
+					BRK;
+				END;
+
+				IF .O THEN
+				DO;
+					CALL HC3AE;
+					IF ^.O THEN
+					DO;
+						CALL HC569;
+						BRK;
+					END;
+				END;
+
+				BRK;
+			END;
+		END;
+
+		BRK;
+		RETURN;
+	END;
+
+" Test '='";
+
+" Test '^='";
+
+ HC35D:
+	CALL HB1C9; STRING '^=';
+	IF ^.O THEN
+	DO;
+		CALL HB4C4; STRING 'BNE ';
+		CALL HC398;
+		IF ^.O THEN
+		DO;
+			CALL HC598;
+			BRK;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HB375;
+			IF ^.O THEN
+			DO;
+				CALL HCF93;
+				CALL HCFA0;
+				CALL HCCD1;
+				IF ^.O THEN
+				DO;
+					CALL HC598;
+					BRK;
+				END;
+
+				IF .O THEN
+				DO;
+					CALL HC3AE;
+					IF ^.O THEN
+					DO;
+						CALL HC598;
+						BRK;
+					END;
+				END;
+
+				BRK;
+			END;
+		END;
+
+		BRK;
+	END;
+
+	RETURN;
+
+" Traitement chaine ASCII éventuelle";
+
+ HC398:
+	CALL HB313;
+	IF ^.O THEN
+	DO;
+		CALL HC98F;
+		BRK;
+		CALL HB1C9; STRING '''';
+		BRK;
+		CALL HCFA0;
+		CALL HC3AE;
+		BRK;
+	END;
+
+	RETURN;
+
+" OUT 'LDX #0\n' + push(H02A1, H0250+pop(H02A1)+',X')";
+
+ HC3AE:
+	CALL HCF31;
+	CALL HB57E;
+	CALL HCF93;
+	CALL HB468; STRING ',X';
+	CALL HCFA0;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'HALT;'";
+" -----------------------------------------------------------------------------";
+
+ HC3C0:
+	CALL HB1C9; STRING 'HALT;';
+	IF ^.O THEN
+	DO;
+		CALL HB21E; STRING 'JMP *';
+	END;
+
+	RETURN;
+
+
+" Vérifie que le caractère actuel est un caractère Hexa [0-9A-F]";
+
+ HC3D3:
+	CALL HB1C9; STRING '0'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '1'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '2'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '3'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '4'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '5'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '6'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '7'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '8'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '9'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING 'A'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING 'B'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING 'C'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING 'D'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING 'E'; IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING 'F';
+
+	RETURN;
+
+
+" Traitement identifiant";
+
+" Sortie:";
+"	V=0: Ok (H0200 contient l'identifiant, ajoute l'identifiant au tampon H0400)";
+"	V=1: Non";
+
+ HC441:
+	CALL HB375;
+	IF ^.O THEN CALL HCF73;
+	RETURN;
+
+
+" Instructions '#<' <identifiant>, '#>' <identifiant>, '#' <identifiant>, <identifiant>";
+" Résultat dans le tampon H0200 + ajout dans le tampon H0400";
+
+ HC44A:
+	CALL HB1C9; STRING '#<';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING '#>';
+		IF .O THEN
+		DO;
+			CALL HB1C9; STRING '#';
+		END;
+	END;
+
+	IF ^.O THEN
+	DO;
+		CALL HCF73;
+		CALL HC441;
+		BRK;
+	END;
+
+	IF ^.O THEN RETURN;
+
+
+" Attend un identifiant";
+" Résultat dans le tampon H0200 + ajout dans le tampon H0400";
+
+ HC468:
+	CALL HC441;
+	RETURN;
+
+
+" Identifiant ou valeur numérique hexa,binaire, décimale";
+" Résultat dans le tampon H0400";
+
+ HC46C:
+	CALL HC441;
+	IF ^.O THEN RETURN;
+
+	CALL HC49E;
+	RETURN;
+
+
+
+" '#<' <identifiant>, '#>' <identifiant>, '#' <identifiant>, <identifiant>, <valeur numérique>";
+
+" Compile l'argument pour une instruction dans le tampon H0400";
+
+ HC476:
+	CALL HC44A;
+	IF ^.O THEN RETURN;
+
+	CALL HC507;
+	RETURN;
+
+
+
+" Compilation de l'argument d'une instruction ASM pour '#<' <identifiant>, '#>' <identifiant>, '#' <identifiant>, <identifiant>, <valeur numérique>";
+" Résultat dans le tampon H0400";
+" Affichage du tampon H0400 si 2 passes";
+
+ HC480:
+	CALL HC476;
+	IF ^.O THEN CALL HB119;
+	RETURN;
+
+
+
+ HC489:
+	CALL HB1C9; STRING '[';
+	IF ^.O THEN
+	DO;
+		CALL HC130;
+		BRK;
+		CALL HB1C9; STRING ']';
+		BRK;
+		RETURN;
+	END;
+
+	CLR .O;
+	CALL HCF27;
+	RETURN;
+
+
+" Attend une valeur numérique hexa, binaire, décimale";
+" Résultat dans le tampon H0400";
+
+ HC49E:
+	CALL HB1C9; STRING '-';
+	IF ^.O THEN
+	DO;
+		CALL HCF93;
+		CALL HC4B0;
+		BRK;
+		RETURN;
+	END;
+
+	CALL HC4B0;
+	RETURN;
+
+
+" Attend une valeur numérique positive (hexa, binaire, décimal)";
+
+" Le résultat est copié dans le tampon H0400";
+ HC4B0:
+	CALL HB1C9; STRING '$';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF93;
+
+		"La boucle suivante necessite WHILE .flag";
+		HC4B9:
+		IF ^.O THEN
+		BEGIN;
+			CALL HC3D3;
+			IF ^.O THEN CALL HCF93;
+			GOTO HC4B9;
+		END;
+
+		CLR .O;
+		CALL HB1C9; STRING '$';
+
+		IF .O THEN CLR .O;
+		BRK;
+	END;
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '%';
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF93;
+
+			HC4DA:
+			IF ^.O THEN
+			BEGIN;
+				CALL HC4FB;
+				IF ^.O THEN CALL HCF93;
+				GOTO HC4DA;
+			END;
+
+			CLR .O;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			CALL HB3FF;
+			IF ^.O THEN CALL HCF93;
+		END;
+	END;
+
+	IF ^.O THEN
+	BEGIN;
+		CALL HCFA0;
+		CALL HCEE9;
+	END;
+
+	RETURN;
+
+" Vérifie que le caractère actuel est un caractère Binaire [0-1]";
+ HC4FB:
+	CALL HB1C9; STRING '0';
+	IF ^.O THEN RETURN;
+
+	CALL HB1C9; STRING '1';
+	RETURN;
+
+
+" Attend une valeur numérique (hexa, binaire, décimale)";
+
+" Ajoute '#<$FFFF+1-' ou '#' dans le tampon H0250 (préfixe pour la valeur numérique)";
+" Préfixe + Valeur numérique dans le tampon H0400";
+
+ HC507:
+	CALL HB1C9; STRING '-';
+	IF ^.O THEN
+	DO;
+		CALL HB468; STRING '#<$FFFF+1-';
+		CALL HC4B0; BRK;
+		RETURN;
+	END;
+
+	CALL HCF8E;
+	CALL HC4B0; BRK;
+	RETURN;
+
+
+
+
+ HC527:
+	CALL HC9C6;
+	IF ^.O THEN
+	DO;
+		CALL HCEE2;
+		CALL HCF17;
+		CALL HB57E;
+		CALL HCF93;
+		CALL HCEE2;
+		CALL HB225; STRING '%';
+		CALL HC480;
+		BRK;
+
+		 "Pour la boucle suivante,il faudrait WHILE .flag";
+		HC543:
+		IF ^.O THEN
+		DO;
+			CALL HC6FF;
+			IF ^.O THEN
+			DO;
+				CALL HC476;
+				BRK;
+				CALL HB119;
+			END;
+
+			GOTO HC543;
+		END;
+
+		CLR .O;
+	END;
+
+	RETURN;
+
+
+
+" Si valeur numérique ou ASCII ou identifiant ou valeur directe -> 'LDA _val_\n' + expression + 'STA R0\n'";
+
+ HC556:
+	CALL HCCE1;
+	IF ^.O THEN
+	DO;
+		CALL HCFA0;
+		CALL HCAF3;
+		CALL HB97A;
+		BRK;
+		CALL HCF6C;
+	END;
+	RETURN;
+
+ HC569:
+	CALL HCEBD;
+	CALL HCF17;
+	CALL HCEE2;
+	CALL HCEF7;
+	CALL HB57E;
+	CALL HCF93;
+	CALL HCEE2;
+	CALL HCFA0;
+	CALL HCEAF;
+	CALL HCB0A;
+	CALL HCFA0;
+	CALL HCEAF;
+	CALL HC0B1;
+	BRK;
+	CALL HCEE2;
+	CALL HCFA0;
+	RETURN;
+
+ HC598:
+	CALL HCEBD;
+	CALL HCF17;
+	CALL HCEE2;
+	CALL HCEF7;
+	CALL HB57E;
+	CALL HCF93;
+	CALL HCEE2;
+	CALL HCFA0;
+	CALL HCEE9;
+	CALL HB21E; STRING ' *+11';
+	CALL HCEAF;
+	CALL HCFA0;
+	CALL HC0B1;
+	BRK;
+	CALL HCEE2;
+	CALL HCF0F;
+	CALL HCEBD;
+	CALL HB119;
+	CALL HCEAF;
+	CALL HCFA0;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"		Instruction 'THEN ' xxxx ['ELSE ' xxxxx]";
+" -----------------------------------------------------------------------------";
+
+ HC5D8:
+		CALL HB1C9; STRING 'THEN ';
+		IF ^.O THEN
+		DO;
+			CALL HCC67;
+			BRK;
+
+			CALL HB1C9; STRING 'ELSE ';
+			IF ^.O THEN
+			DO;
+				CALL HCF0F;
+				CALL HCEBD;
+				CALL HB119;
+				CALL HCEE2;
+				CALL HCEAF;
+				CALL HCFA0;
+				CALL HCC67;
+				BRK;
+			END;
+
+			IF .O THEN CLR .O;
+			BRK;
+			CALL HCEE2;
+		END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"		Instructions 'INC ', 'DEC ', 'INCW ', 'DECW '";
+" -----------------------------------------------------------------------------";
+
+" Instruction 'INC '";
+
+ HC60E:
+	CALL HB1C9; STRING 'INC ';
+	IF ^.O THEN
+	BEGIN;
+		"Patch pour INC .reg";
+		" [--- ";
+		"INC .A;";
+		CALL HREGA;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'SEC';
+			CALL HB21E; STRING 'ADC #0';
+			RETURN;
+		END;
+
+		"INC .X;";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			OUT_INX:
+			CALL HB21E; STRING 'INX';
+			RETURN;
+		END;
+
+		"INC .Y;";
+		CALL HREGY;
+		IF ^.O THEN
+		BEGIN;
+			OUT_INY:
+			CALL HB21E; STRING 'INY';
+			RETURN;
+		END;
+
+		"Retour a la routine d'origine";
+		CLR .O;
+		" ---]";
+
+		" INC id";
+		CALL HB375;
+		BRK;
+		CALL HCF07;
+		CALL HCF78;
+		RETURN;
+	END;
+
+" Instruction 'DEC '";
+	CALL HB1C9; STRING 'DEC ';
+	IF ^.O THEN
+	BEGIN;
+
+		"Patch pour INC .reg";
+		" [--- ";
+		"DEC .A;";
+		CALL HREGA;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'CLC';
+			CALL HB21E; STRING 'SBC #0';
+			RETURN;
+		END;
+
+		"DEC .X;";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			OUT_DEX:
+			CALL HB21E; STRING 'DEX';
+			RETURN;
+		END;
+
+		"DEC .Y;";
+		CALL HREGY;
+		IF ^.O THEN
+		BEGIN;
+			OUT_DEY:
+			CALL HB21E; STRING 'DEY';
+			RETURN;
+		END;
+
+		"Retour a la routine d'origine";
+		CLR .O;
+		" ---]";
+
+		" DEC id";
+		CALL HB375;
+		BRK;
+		CALL HCEFF;
+		CALL HCF78;
+		RETURN;
+	END;
+
+" Instruction 'INCW '";
+	CALL HB1C9; STRING 'INCW ';
+	IF ^.O THEN
+	BEGIN;
+		CALL HB375;
+		BRK;
+		CALL HCF07;
+		CALL HCF78;
+		CALL HB225; STRING 'BNE ';
+		CALL HCEBD;
+		CALL HB119;
+		CALL HCF07;
+		CALL HCF73;
+		CALL HCF42;
+		CALL HCEB6;
+		CALL HB119;
+		RETURN;
+	END;
+
+" Instruction 'DECW '";
+	CALL HB1C9; STRING 'DECW ';
+	IF ^.O THEN
+	BEGIN;
+		CALL HB375;
+		BRK;
+		CALL HCF17;
+		CALL HCF78;
+		CALL HB225; STRING 'BNE ';
+		CALL HCEBD;
+		CALL HB119;
+		CALL HCEFF;
+		CALL HCF73;
+		CALL HCF42;
+		CALL HCEB6;
+		CALL HCEFF;
+		CALL HCF78;
+	END;
+
+	RETURN;
+
+ HC69B:
+	CALL HC527;
+	IF ^.O THEN
+	DO;
+		CALL HCF63;
+		CALL HCF42;
+		CALL HB4C4; STRING 'R0+1';
+		CALL HC7FE;
+		BRK;
+		RETURN;
+	END;
+
+	CALL HC7FE;
+	RETURN;
+
+ "Appelé uniquement depuis la routine HBDF3 (Instruction 'IF')";
+
+ HC6B6:
+	CALL HB1C9; STRING '[';
+	IF ^.O THEN
+	BEGIN;
+		CALL HC112;
+		BRK;
+		CALL HB1C9; STRING '].';
+		IF ^.O THEN
+		BEGIN;
+			CALL HC31D;
+			BRK;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			CALL HB1C9; STRING ']';
+			IF ^.O THEN
+			BEGIN;
+				CALL HC69B;
+				BRK;
+			END;
+		END;
+
+		BRK;
+	END;
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '.';
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF27;
+			CALL HB57E;
+			CALL HCF93;
+			CALL HB468; STRING ',Y';
+			CALL HCFA0;
+			CALL HC31D;
+			BRK;
+		END;
+
+		IF .O THEN CALL HC7FE;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" Affichage du contenu du tampon H0400 si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HC6FB:
+	CALL HB119;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"		Instructions '+', '-', '.AND ', '.OR ', '.EOR '";
+
+" Place le code dans le tampon H0400";
+" -----------------------------------------------------------------------------";
+ HC6FF:
+	CALL HB1C9; STRING '+';
+	IF ^.O THEN
+	BEGIN;
+		CALL HB21E; STRING 'CLC';
+		CALL HB225; STRING 'ADC ';
+		RETURN;
+	END;
+
+	CALL HB1C9; STRING '-';
+	IF ^.O THEN
+	BEGIN;
+		CALL HB21E; STRING 'SEC';
+		CALL HB225; STRING 'SBC ';
+		RETURN;
+	END;
+
+	CALL HCE8A;
+	IF ^.O THEN
+	BEGIN;
+		"Le label suivant est utilisé par les extensions";
+		"TODO: placer les 2 lignes suiavntes dans une routine";
+		"et modifier celle-ci en conséquence";
+		HC72C:
+		CALL HB225; STRING 'AND ';
+		RETURN;
+	END;
+
+	CALL HCEA0;
+	IF ^.O THEN
+	BEGIN;
+		"Le label suivant est utilisé par les extensions (PULSE)";
+		"TODO: placer les 2 lignes suiavntes dans une routine";
+		"et modifier celle-ci en conséquence";
+		HC739:
+		CALL HB225; STRING 'ORA ';
+		RETURN;
+	END;
+
+	CALL HCEA7;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB225; STRING 'EOR ';
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"	Instructions '+', '-', '.AND ', '.OR ', '.EOR ' suivie d'un identifiant";
+" -----------------------------------------------------------------------------";
+
+ HC74E:
+	CALL HB1C9; STRING '+';
+	IF ^.O THEN
+	DO;
+		CALL HB21E; STRING 'CLC';
+		CALL HB468; STRING 'ADC ';
+	END;
+
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING '-';
+		IF ^.O THEN
+		DO;
+			CALL HB21E; STRING 'SEC';
+			CALL HB468; STRING 'SBC ';
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HCE8A;
+			IF ^.O THEN
+			DO;
+				CALL HB468; STRING 'AND ';
+			END;
+
+			IF .O THEN
+			DO;
+				CALL HCEA0;
+				IF ^.O THEN
+				DO;
+					CALL HB468; STRING 'ORA ';
+				END;
+
+				IF .O THEN
+				DO;
+					CALL HCEA7;
+					IF ^.O THEN
+					DO;
+						CALL HB468; STRING 'EOR ';
+					END;
+				END;
+			END;
+		END;
+	END;
+
+	IF ^.O THEN
+	DO;
+		CALL HB375;
+		BRK;
+		CALL HCF93;
+		CALL HB468; STRING ',X';
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'PAGE '";
+" PAGE ;";
+" PAGE 'texte';";
+" -----------------------------------------------------------------------------";
+
+ HC7AF:
+	CALL HB1C9; STRING 'PAGE ';
+	IF ^.O THEN
+	DO;
+		CALL HB225; STRING '.PAG ';
+		CALL HB1C9; STRING ';';
+		IF ^.O THEN CALL HB119;
+
+		IF .O THEN
+		DO;
+			CALL HCF4E;
+			CALL HB313;
+			BRK;
+			CALL HCF73;
+			CALL HB1C9; STRING '''';
+			BRK;
+			CALL HCF4E;
+			CALL HB119;
+			CALL HB1C9; STRING ';';
+			BRK;
+		END;
+
+		BRK;
+	END;
+
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" ' *=*+ <valeur_decimale>\n'";
+" -----------------------------------------------------------------------------";
+
+ HC7E8:
+	CALL HB468; STRING ' *=*+';
+	CALL HB3FF; BRK;
+	CALL HCF93;
+	CALL HCFA0;
+	CALL HCEE2;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" RelOper (cf 3-6)";
+" '>=', '>','<=', '=', '^=', '<'";
+" -----------------------------------------------------------------------------";
+ HC7FE:
+	CALL HCA7A;
+	IF ^.O THEN
+	BEGIN;
+		CALL HC855;
+		BRK;
+		CALL HCEE9;
+		CALL HB21E; STRING ' *+7';
+		CALL HCEE9;
+		CALL HCF5B;
+	END;
+
+	IF .O THEN
+	BEGIN;
+		CALL HCA92;
+		IF ^.O THEN
+		BEGIN;
+			CALL HC855;
+			BRK;
+			CALL HCEE9;
+			CALL HCF5B;
+		END;
+
+		IF .O THEN
+		BEGIN;
+			CALL HCADC;
+			IF ^.O THEN
+			BEGIN;
+				CALL HC855;
+				BRK;
+				CALL HCEE9;
+				CALL HB21E; STRING ' *+4';
+				CALL HCEE9;
+				CALL HCF5B;
+			END;
+		END;
+	END;
+
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF0F;
+		CALL HCEBD;
+		CALL HCEAF;
+		CALL HCFA0;
+		CALL HB119;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+ "Utilisé uniquement depuis la routine précédente";
+" -----------------------------------------------------------------------------";
+
+ HC855:
+	CALL HCCE1;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCFA0;
+		CALL HC527;
+		IF ^.O THEN CALL HCF87;
+
+		IF .O THEN
+		BEGIN;
+			CALL HCCD1;
+			IF ^.O THEN
+			BEGIN;
+				CALL HCAF3;
+				CALL HCF87;
+			END;
+
+			IF .O THEN
+			BEGIN;
+				CLR .O;
+				CALL HCAF3;
+				CALL  HCF87;
+			END;
+		END;
+
+		BRK;
+	END;
+
+	IF .O THEN
+	BEGIN;
+		CALL HB313;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF17;
+			CALL HCAFA;
+			CALL HB119;
+			CALL HCF87;
+		END;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'RETURN;'";
+" -----------------------------------------------------------------------------";
+
+ HC890:
+	CALL HB1C9; STRING 'RETURN;';
+	IF ^.O THEN
+	DO;
+		CALL HB21E; STRING 'RTS ';
+		RETURN;
+	END;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'RTI;'";
+" -----------------------------------------------------------------------------";
+
+ HC8A4: "HC8A4:";
+	CALL HB1C9; STRING 'RTI;';
+	IF ^.O THEN
+	DO;
+		CALL HB21E; STRING 'RTI';
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instructions 'ROL ', 'ROR '";
+" -----------------------------------------------------------------------------";
+
+ HC8B4:
+	"Alias ROTATE LEFT/RIGHT";
+	"TODO: A réécrire?";
+	CALL HB1C9; STRING 'ROTATE ';
+	IF ^.O THEN
+	DO;
+
+		CALL HLEFT;
+		IFF ^.O THEN HC8BD;
+
+		CALL HRIGHT;
+		IFF ^.O  THEN HC8CF;
+
+		RETURN;
+	END;
+
+	CALL HB1C9; STRING 'ROL ';
+	IF ^.O THEN
+	DO;
+		HC8BD:
+		CALL HB4C4; STRING 'ROL ';
+	END;
+
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING 'ROR ';
+		IF ^.O THEN
+		DO;
+			HC8CF:
+			CALL HB4C4; STRING 'ROR ';
+		END;
+	END;
+
+	IF ^.O THEN
+	DO;
+		CALL HB57E;
+		CALL HCF93;
+		CALL HCB29; BRK;
+	END;
+
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Attend une valeur numérique décimale négative ou positive décimale, hexa, binaire ou ASCII";
+" La valeur ASCII est de la forme 'A', 'ABCDEFG',... (pas de vérification de la longueur de la chaine)";
+
+" Résultat dans le tampon H0250";
+" -----------------------------------------------------------------------------";
+
+ HC8E3:
+	CALL HB1C9; STRING '-';
+	IF ^.O THEN
+	DO;
+		CALL HB468; STRING '#<$FFFF+1-';
+		CALL HB3FF;
+		BRK;
+		CALL HCF93;
+		RETURN;
+	END;
+
+
+" -----------------------------------------------------------------------------";
+" Attend une valeur numérique positive décimale, hexa, binaire ou ASCII";
+" -----------------------------------------------------------------------------";
+
+ HC8FE: "HC8FE:";
+	CALL HC92A;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Attend '<id>', '#< id', '#> id', '# id'";
+" Resultat dans le tampon H0250 (identifiant dans H0200)";
+" -----------------------------------------------------------------------------";
+
+ HC902:
+	CALL HB375;
+	IF ^.O THEN
+	DO;
+		CALL HCF93;
+		RETURN;
+	END;
+
+	CALL HB1C9; STRING '#<';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING '#>';
+		IF .O THEN
+		DO;
+			CALL HB1C9; STRING '#';
+		END;
+	END;
+
+	IF ^.O THEN
+	DO;
+		CALL HCF93;
+		CALL HB375;
+		BRK;
+		CALL HCF93;
+	END;
+
+ 	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Attend une valeur numérique positive décimale, hexa, binaire ou ASCII";
+" La valeur ASCII est de la forme 'A', 'ABCDEFG',...";
+" -----------------------------------------------------------------------------";
+
+" Valeur décimale?";
+ HC92A:
+	CALL HB3FF;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF8E;
+		CALL HCF93;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+ HC935:
+		IF ^.O THEN
+		BEGIN;
+			CALL HB3FF;
+			IF ^.O THEN CALL HCF93;
+
+			GOTO HC935;
+		END;
+
+		CLR .O;
+		RETURN;
+	END;
+
+" Valeur hexa?";
+	CALL HB1C9; STRING '$';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF8E;
+		CALL HCF93;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+ HC950:
+		IF ^.O THEN
+		BEGIN;
+			CALL HC3D3;
+			IF ^.O THEN CALL HCF93;
+			GOTO HC950;
+		END;
+
+		CLR .O;
+		RETURN;
+	END;
+
+" Valeur binaire?";
+	CALL HB1C9; STRING '%';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF8E;
+		CALL HCF93;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+ HC96B:
+		IF ^.O THEN
+		BEGIN;
+			CALL HC4FB;
+			IF ^.O THEN CALL HCF93;
+			GOTO HC96B;
+		END;
+
+		CLR .O;
+		RETURN;
+	END;
+
+" Chaine ASCII?";
+	CALL HB313;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF8E;
+		CALL HB468; STRING '''';
+		CALL HCF93;
+
+		" Ajout du ' fermant la chaine";
+		CALL HB468; STRING '''';
+
+		CALL HB1C9; STRING '''';
+		BRK;
+	END;
+
+	RETURN;
+
+" Cas d'un test du type IF A[i].j = 'str' ou IF A[i].j ^= 'str'";
+" Compile la partie droite du test";
+
+" 'JMP ZZnnnn+1\nZZnnnn+2' .BYT 'str'\nZZnnnn+1\n & H0250='ZZnnnn+2'";
+" Appelé uniquement depuis la routine en HC398 (Traitement chaine ASCII éventuelle)";
+
+ HC98F:
+	CALL HCF93;
+	CALL HCFA0;
+	CALL HCF0F;
+	CALL HCEBD;
+	CALL HB119;
+	CALL HCEAF;
+	CALL HCEBD;
+	CALL HCEC9;
+	CALL HCF4E;
+	CALL HCEE9;
+	CALL HCF4E;
+	CALL HB119;
+	CALL HCFA0;
+	CALL HCEE2;
+	CALL HCEAF;
+	RETURN;
+
+
+" Attend '<id>', '#< id', '#> id', '# id'";
+" Résultat dans le tampon H0250 + ajout dans le tampon H02A1";
+ HC9BD:
+	CALL HC902;
+	IF ^.O THEN CALL HCFA0;
+
+	RETURN;
+
+
+" '+', '-', '.AND', '.OR', '.EOR'";
+" Place le code dans le tampon H02A1";
+
+ HC9C6:
+	CALL HB1C9; STRING '+';
+	IF ^.O THEN
+	DO;
+		CALL HB4C4; STRING 'ADC ';
+		CALL HB4C4; STRING 'CLC';
+		RETURN;
+	END;
+
+
+	CALL HB1C9; STRING '-';
+	IF ^.O THEN
+	DO;
+		CALL HB4C4; STRING 'SBC ';
+		CALL HB4C4; STRING 'SEC';
+		RETURN;
+	END;
+
+
+	CALL HCE8A;
+	IF ^.O THEN
+	DO;
+		CALL HB4C4; STRING 'AND ';
+		CALL HB4C4; STRING ';';
+		RETURN;
+	END;
+
+
+	CALL HCEA0;
+	IF ^.O THEN
+	DO;
+		CALL HB4C4; STRING 'ORA ';
+		CALL HB4C4; STRING ';';
+		RETURN;
+	END;
+
+
+	CALL HCEA7;
+	IF ^.O THEN
+	DO;
+		CALL HB4C4; STRING 'EOR ';
+		CALL HB4C4; STRING ';';
+	END;
+	RETURN;
+
+
+" '<', '>=', '=', '^='";
+" Place le code dans le tampon H02A1";
+
+ HCA21:
+	CALL HB1C9; STRING '<';
+	IF ^.O THEN
+	DO;
+		" Label suivant utilisé par les extensions IFF/IF";
+		" TODO: Faire une routine pour les 2 lignes suivantes";
+		HCA27:
+		CALL HB4C4; STRING 'BCC ';
+		RETURN;
+	END;
+
+
+	CALL HB1C9; STRING '>=';
+	IF ^.O THEN
+	DO;
+		" Label suivant utilisé par les extensions IFF/IF";
+		" TODO: Faire une routine pour les 2 lignes suivantes";
+		HCA36:
+		CALL HB4C4; STRING 'BCS ';
+		RETURN;
+	END;
+
+
+	CALL HB1C9; STRING '=';
+	IF ^.O THEN
+	DO;
+		CALL HCF98;
+		RETURN;
+	END;
+
+
+	CALL HB1C9; STRING '^=';
+	IF ^.O THEN
+	DO;
+		" Label utilisé par les extensions IFF/IF";
+		" TODO: Faire une routine pour les 2 lignes suivantes";
+		HCA4F:
+		CALL HB4C4; STRING 'BNE ';
+	END;
+
+	RETURN;
+
+
+" '>'";
+
+ HCA57:
+	CALL HB1C9; STRING '>';
+	IF ^.O THEN
+	DO;
+		CALL HB4C4; STRING 'BCS ';
+		CALL HCF98;
+	END;
+
+	RETURN;
+
+
+" '<='";
+
+ HCA68:
+	CALL HB1C9; STRING '<=';
+	IF ^.O THEN
+	DO;
+		CALL HB4C4; STRING 'BCC ';
+		CALL HCF98;
+	END;
+
+	RETURN;
+
+
+" '>='";
+
+ HCA7A:
+	CALL HB1C9; STRING '>=';
+	IF ^.O THEN
+	DO;
+		CALL HB57E;
+		CALL HB4C4; STRING 'BCC ';
+		CALL HCF98;
+		CALL HCFA5;
+	END;
+
+	RETURN;
+
+
+" '>', '<=', '=', '<='";
+
+ HCA92:
+	CALL HB1C9; STRING '>';
+	IF ^.O THEN
+	DO;
+		CALL HB57E;
+		CALL HB4C4; STRING 'BCC ';
+	END;
+
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING '<=';
+		IF ^.O THEN
+		DO;
+			CALL HB57E;
+			CALL HB4C4; STRING 'BCS ';
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HB1C9; STRING '=';
+			IF ^.O THEN
+			DO;
+				CALL HB57E;
+				CALL HCF98;
+			END;
+
+			IF .O THEN
+			DO;
+				CALL HB1C9; STRING '^=';
+				IF ^.O THEN
+				DO;
+					CALL HB57E;
+					CALL HB4C4; STRING 'BNE ';
+				END;
+			END;
+		END;
+	END;
+
+	IF ^.O THEN CALL HCFA5;
+
+	RETURN;
+
+
+" '<'";
+
+ HCADC:
+	CALL HB1C9; STRING '<';
+	IF ^.O THEN
+	DO;
+		CALL HB57E;
+		CALL HB4C4; STRING 'BCS ';
+		CALL HCF98;
+		CALL HCFA5;
+	END;
+
+	RETURN;
+
+
+" 'LDA pop(H02A1)'";
+
+ HCAF3:
+	CALL HCF17;
+	CALL HCEE2;
+	RETURN;
+
+
+" OUT2 ''#''' + ajoute tampon H0200 au tampon H0400";
+
+ HCAFA:
+	CALL HB225; STRING '#';
+	CALL HCF4E;
+	CALL HCF73;
+	CALL HB1C9; STRING ''''; BRK;
+	RETURN;
+
+
+" OUT 'pop(H02A1) *+5' OUT2'JMP push(newlbl)'";
+
+ HCB0A:
+	CALL HB57E;
+	CALL HCF73;
+	CALL HCF5B;
+	CALL HCF0F;
+	CALL HCEBD;
+	CALL HB119;
+	RETURN;
+
+
+" OUT2 'LDA ' + Ajoute POP(H02A1) au tampon H0400 + OUT ',X'";
+
+ HCB1D:
+	CALL HCF17;
+	CALL HCEE9;
+	CALL HB21E; STRING ',X';
+	RETURN;
+
+
+
+ HCB29:
+	CALL HC9BD;
+	IF ^.O THEN
+	DO;
+		CALL HCCD1;
+		IF .O THEN  CLR .O;
+
+		BRK;
+		CALL HB1C9; STRING '.';
+		IF ^.O THEN
+		DO;
+			CALL HCCE1; BRK;
+			CALL HCFA0;
+			CALL HCAF3;
+			CALL HB97A; BRK;
+			CALL HB21E; STRING 'TAY';
+			CALL HCEBD;
+			CALL HCEE2;
+			CALL HB21E; STRING 'DEY';
+			CALL HB225; STRING 'BNE ';
+			CALL HCEB6;
+			CALL HB119;
+		END;
+
+		IF .O THEN
+		DO;
+			CLR .O;
+			CALL HCEE2;
+		END;
+
+		BRK;
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instructions 'SHL ' et 'SHR '";
+" -----------------------------------------------------------------------------";
+
+ HCB70:
+	"Alias SHIFT LEFT/RIGHT";
+	"TODO: A réécrire?";
+	CALL HB1C9; STRING 'SHIFT ';
+	IF ^.O THEN
+	DO;
+
+		CALL HLEFT;
+		IFF ^.O THEN HCB79;
+
+		CALL HRIGHT;
+		IFF ^.O  THEN HCB8B;
+
+		RETURN;
+	END;
+
+	CALL HB1C9; STRING 'SHL ';
+	IF ^.O THEN
+	DO;
+		HCB79:
+		CALL HB4C4; STRING 'ASL ';
+	END;
+
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING 'SHR ';
+		IF ^.O THEN
+		DO;
+			HCB8B:
+			CALL HB4C4; STRING 'LSR ';
+		END;
+	END;
+
+	IF ^.O THEN
+	DO;
+		CALL HB57E;
+		CALL HCF93;
+		CALL HCB29; BRK;
+		RETURN;
+	END;
+
+" -----------------------------------------------------------------------------";
+"			Branchement vers les extensions";
+" -----------------------------------------------------------------------------";
+	CALL EXTENSIONS;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'ENTRY'";
+" -----------------------------------------------------------------------------";
+
+ HCB9F:
+	CALL HB1C9; STRING 'ENTRY';
+	IF ^.O THEN
+	DO;
+		CALL HB225; STRING ' *=';
+		CALL HC46C;
+		IF .O THEN
+		DO;
+			CLR .O;
+			CALL HB225; STRING '$200';
+		END;
+
+		BRK;
+		CALL HB119;
+		CALL HB1C9; STRING ',';
+
+		IF ^.O THEN
+		DO;
+			CALL HB225; STRING 'R0=';
+			CALL HC46C; BRK;
+		END;
+
+		IF .O THEN
+		DO;
+			CLR .O;
+			CALL HB225; STRING 'R0=0';
+		END;
+
+		BRK;
+		CALL HB119;
+		CALL HB21E; STRING 'R1=R0+2';
+		CALL HB21E; STRING 'R2=R1+1';
+		CALL HB21E; STRING 'R3=R2+1';
+		CALL HB21E; STRING 'CLD';
+		CALL HB21E; STRING 'LDX #$FF';
+
+	HCC0D:
+		CALL HB21E; STRING 'TXS';
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"		Instruction 'STACK <id>' | 'STACK WORD <id>'";
+" -----------------------------------------------------------------------------";
+
+ HCC14:
+	CALL HB1C9; STRING 'STACK ';
+	IF ^.O THEN
+	DO;
+		CALL HCC34;
+		BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+		HCC23:
+		IF ^.O THEN
+		DO;
+			CALL HB1C9; STRING ',';
+			IF ^.O THEN
+			DO;
+				CALL HCC34;
+				BRK;
+			END;
+
+			GOTO HCC23;
+		END;
+
+		CLR .O;
+	END;
+
+	RETURN;
+
+
+	" Génération du code pour 'STACK <id>' | 'STACK WORD <id>'";
+ HCC34:
+	CALL HB1C9; STRING 'WORD ';
+	IF ^.O THEN
+	DO;
+		CALL HB375;
+		BRK;
+		CALL HCF17;
+		CALL HCF73;
+		CALL HCF42;
+		CALL HCF3B;
+		CALL HCF17;
+		CALL HCF78;
+		CALL HCF3B;
+		RETURN;
+	END;
+
+	"PHA pour un octet seulement";
+
+	"STACK .A;";
+	CALL HREGA;
+	IF .O THEN
+	BEGIN;
+		"STACK .P;";
+		CALL HREGP;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'PHP';
+			RETURN;
+		END;
+		ELSE
+		BEGIN;
+			"STACK .X;";
+			CALL HREGX;
+			IF ^.O THEN
+			BEGIN;
+				CALL OUT_TXA;
+			END;
+			ELSE
+			BEGIN;
+				"STACK .Y;";
+				CALL HREGY;
+				IF ^.O THEN
+				BEGIN;
+					CALL OUT_TYA;
+				END;
+
+				ELSE
+				BEGIN;
+					" STACK id";
+					CLR .O;
+					CALL HCF17;
+					CALL HC480;
+				END;
+			END;
+		END;
+	END;
+	BRK;
+	CALL HB21E; STRING 'PHA';
+
+	RETURN;
+
+
+
+" =============================================================================";
+" Traitement des instructions:";
+
+"	'DCL ', 'DEF ', 'DATA ', 'DATAW ', ''commentaire''";
+"	'STACK ', 'UNSTACK ', 'SHL ', 'SHR ', 'INC ', 'DEC ', 'INCW ', 'DECW ', 'ROL ', 'ROR ', Code assembleur";
+"	'BEGIN;', 'DO '";
+"	'IF'";
+"	'GOTO ', 'CALL '";
+"	'WHILE '";
+"	'FOR '";
+"	'ENTRY'";
+"	';'";
+"	'HALT;'";
+"	'.DFILE ', '.TFILE '";
+"	'BRK;'";
+"	'PAGE '";
+"	'RETURN;', 'RTI;'";
+"	affectation...";
+" =============================================================================";
+
+ HCC67:
+	CALL HBF85; IF ^.O THEN RETURN;
+
+	CALL HBE5D;
+	IF  ^.O THEN
+	DO;
+		CALL HB1C9; STRING ';';
+		BRK;
+		RETURN;
+	END;
+
+	CALL HBD76; IF ^.O THEN RETURN;
+
+	CALL HBDF3; IF ^.O THEN RETURN;
+
+	CALL HBDBA;
+	IF ^.O THEN
+	DO;
+		CALL HB1C9; STRING ';';
+		BRK;
+		RETURN;
+	END;
+
+	CALL HCDEE; IF ^.O THEN RETURN;
+
+	CALL HC265; IF ^.O THEN RETURN;
+
+	CALL HCB9F;
+	IF ^.O THEN
+	DO;
+		CALL HB1C9; STRING ';';
+		BRK;
+		RETURN;
+	END;
+
+	CALL HB1C9; STRING ';'; IF ^.O THEN RETURN;
+
+	CALL HC3C0; IF ^.O THEN RETURN;
+
+	CALL HC23B; IF ^.O THEN RETURN;
+
+	CALL HBDE2; IF ^.O THEN RETURN;
+
+	CALL HC7AF; IF ^.O THEN RETURN;
+
+	CALL HC890; IF ^.O THEN RETURN;
+
+	CALL HB2D9;
+	DATAW HB9DC;
+	RETURN;
+
+
+" Si accés indexé ('[expr]')-> compile l'expression et ajoute l'accés dans H02A1";
+ HCCD1:
+	CALL HB1C9; STRING '[';
+	IF ^.O THEN
+	DO;
+		" [.X]";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB57E;
+			CALL HCF93;
+			CALL HB468; STRING ',X';
+			CALL HCFA0;
+		END;
+
+		ELSE
+		BEGIN;
+			" [.Y]";
+			CALL HREGY;
+			IF ^.O THEN
+			BEGIN;
+				CALL HB57E;
+				CALL HCF93;
+				CALL HB468; STRING ',Y';
+				CALL HCFA0;
+			END;
+
+			ELSE
+			BEGIN;
+				" [exp]";
+				CALL HC142;
+			END;
+		END;
+
+		BRK;
+		CALL HB1C9; STRING ']';
+		BRK;
+
+	END;
+	RETURN;
+
+
+" Attend une valeur numérique positive décimale, hexa, binaire ou decimale négative ou ASCII ou identifiant ou valeur directe";
+
+" Résultat dans le tampon H0250";
+
+ HCCE1:
+	CALL HC8E3;
+	IF ^.O THEN RETURN;
+
+	CALL HC902;
+	RETURN;
+
+
+" Vérification de la syntaxe GOTO et génération du code asm";
+
+" GOTO @id / GOTO [n] [l0,l1,l2,...] / GOTO id";
+
+ HCCEB:
+	CALL HB1C9; STRING '@';
+	IF ^.O THEN
+	DO;
+		CALL HCF0F;
+		CALL HB225; STRING '(';
+		CALL HC46C; BRK;
+		CALL HB21E; STRING ')';
+		RETURN;
+	END;
+
+
+" Cas 'GOTO [n] [l0,l1,l2,...]";
+	CALL HB1C9; STRING '[';
+	IF ^.O THEN
+	DO;
+		"Label suivant utilisé pour l'alias CASE";
+		HCD07:
+		CALL HCCE1; BRK;
+		CALL HCFA0;
+		CALL HCAF3;
+		CALL HB97A; BRK;
+		CALL HB21E; STRING 'ASL A';
+		CALL HB21E; STRING 'TAX ';
+		CALL HCF17;
+		CALL HCEBD;
+		CALL HB21E; STRING ',X';
+		CALL HCF6C;
+		CALL HCF17;
+		CALL HCEB6;
+		CALL HB21E; STRING '+1,X';
+		CALL HCF63;
+		CALL HCF42;
+		CALL HB1C9; STRING ']'; BRK;
+
+		"Traitement de la liste des labels";
+		CALL HB1C9; STRING '['; BRK;
+		CALL HCF0F;
+		CALL HB21E; STRING '(R0)';
+		CALL HCEB6;
+		CALL HB225; STRING '.WORD ';
+		CALL HC46C;
+		BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+		HCD69:
+		IF ^.O THEN
+		DO;
+			CALL HB1C9; STRING ',';
+			IF ^.O THEN
+			DO;
+				CALL HCF73;
+				CALL HC46C; BRK;
+			END;
+
+			GOTO HCD69;
+		END;
+
+		CLR .O;
+		CALL HB119;
+		CALL HB1C9; STRING ']';
+		BRK;
+		RETURN;
+	END;
+
+" Traitement de la liste de labels";
+
+" Cas 'GOTO id'";
+	CALL HCF0F;
+	CALL HC46C; BRK;
+	CALL HB119;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"		Instruction 'UNSTACK' <id> | 'UNSTACK' 'WORD' <id>";
+" -----------------------------------------------------------------------------";
+
+ HCD90:
+	CALL HB1C9; STRING 'UNSTACK ';
+	IF ^.O THEN
+	DO;
+		CALL HCDB2; BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+		HCDA1:
+		IF ^.O THEN
+		DO;
+			CALL HB1C9; STRING ',';
+			IF ^.O THEN
+			DO;
+				CALL HCDB2; BRK;
+			END;
+
+			GOTO HCDA1;
+		END;
+
+		CLR .O;
+	END;
+
+	RETURN;
+
+
+	"Génération du code pour 'UNSTACK' <id> | 'UNSTACK' 'WORD' <id>";
+ HCDB2:
+	CALL HB1C9; STRING 'WORD ';
+	IF ^.O THEN
+	DO;
+		CALL HB375; BRK;
+		CALL HB21E; STRING 'PLA';
+		CALL HCF53;
+		CALL HCF78;
+		CALL HB21E; STRING 'PLA';
+		CALL HCF53;
+		CALL HCF73;
+		CALL HCF42;
+		RETURN;
+	END;
+
+	"PLA pour un octet seulement";
+	"CLR .O;";
+
+	"UNSTACK .P;";
+	CALL HREGP;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB21E; STRING 'PLP';
+		RETURN;
+	END;
+
+	" Dans tous les autres cas il faut faire un PLA";
+	CALL HB21E; STRING 'PLA';
+
+	"UNSTACK .A;";
+	" Possibilité de gagner 1 octet en déplaçant ce test au niveau"
+	" de UNSTACK id>";
+	CALL HREGA;
+	IF ^.O THEN RETURN;
+
+	"UNSTACK .X;";
+	CALL HREGX;
+	IF ^.O THEN
+	BEGIN;
+		OUT_TAX:
+		CALL HB21E; STRING 'TAX';
+		RETURN;
+	END;
+
+	"UNSTACK .Y;";
+	CALL HREGY;
+	IF ^.O THEN
+	BEGIN;
+		OUT_TAY:
+		CALL HB21E; STRING 'TAY';
+		RETURN;
+	END;
+
+	"CALL HREGA;";
+	"IF .O THEN";
+	DO;
+		" UNSTACK <id>";
+		CLR .O;
+		CALL HCF53;
+		CALL HC441; BRK;
+		CALL HB119;
+	END;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+"				Instruction 'WHILE'";
+" -----------------------------------------------------------------------------";
+
+ HCDEE:
+	CALL HB1C9; STRING 'WHILE ';
+	IF .O THEN GOTO HCE89;
+
+	CALL HCEBD;
+	CALL HCEAF;
+	CALL HCFA0;
+
+	" Patch while .flag";
+	" [----";
+	CALL TEST_Flags;
+	IF ^.O THEN CALL HCEE9;
+
+	ELSE
+	BEGIN;
+		CLR .O;
+		" ----]";
+
+		CALL HCF17;
+		CALL HC480; BRK;
+		CALL HB97A; BRK;
+		CALL HCA68;
+		IF ^.O THEN
+		DO;
+			CALL HCEF7;
+			CALL HC480; BRK;
+			CALL HCEE9;
+			CALL HB21E; STRING ' *+7';
+			CALL HCEE9;
+
+			CALL HCF5B;
+		END;
+
+		IF .O THEN
+		DO;
+			CALL HCA21;
+			IF ^.O THEN
+			DO;
+				CALL HCEF7;
+				CALL HC480; BRK;
+				CALL HCEE9;
+				CALL HCF5B;
+			END;
+
+			IF .O THEN
+			DO;
+				CALL HCA57;
+				IF ^.O THEN
+				DO;
+					CALL HCEF7;
+					CALL HC480; BRK;
+					CALL HCEE9;
+					CALL HB21E; STRING ' *+4';
+					CALL HCEE9;
+					CALL HCF5B;
+				END;
+			END;
+		END;
+
+		BRK;
+		CALL HCF0F;
+	END;
+
+ "HCE62:";
+	CALL HCEBD;
+	CALL HB119;
+	CALL HCEAF;
+	CALL HCFA0;
+	CALL HBD76;
+
+	IF .O THEN CALL HCC67;
+
+	BRK;
+	CALL HCF0F;
+	CALL HB57E;
+	CALL HCF93;
+	CALL HCEE2;
+	CALL HCFA0;
+	CALL HCEE2;
+
+ HCE89:
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Token '.AND'?";
+" -----------------------------------------------------------------------------";
+
+ HCE8A:
+	CALL HB1C9; STRING '.AND';
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Token 'INIT'?";
+" -----------------------------------------------------------------------------";
+
+ HCE92:
+ 	"ALias INITIAL";
+	CALL HB1C9; STRING 'INITIAL';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING 'INIT';
+	END;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Token '1;'?";
+" -----------------------------------------------------------------------------";
+
+ HCE9A:
+	CALL HB1C9; STRING '1;';
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Token '.OR'?";
+" -----------------------------------------------------------------------------";
+
+ HCEA0:
+	CALL HB1C9; STRING '.OR';
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"				Token '.EOR'?";
+" -----------------------------------------------------------------------------";
+
+ HCEA7:
+	CALL HB1C9; STRING '.EOR';
+	IF .O THEN
+	DO;
+		CALL HB1C9; STRING '.XOR';
+	END;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute le label actuel (Z12-Z18) dans le tampon H0250";
+" -----------------------------------------------------------------------------";
+
+ HCEAF:
+	CALL HB5C0; STRING '0,%';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute le label actuel (Z12-Z18) dans le tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCEB6:
+	CALL HB5C0; STRING '0,*';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Créé un nouveau label et l'ajoute dans le tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCEBD:
+	CALL HB5C0; STRING '1,*';
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" Set Z04 := $FF";
+" -----------------------------------------------------------------------------";
+
+ HCEC4:
+	CALL HB309; STRING 'C';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute '.BYT ' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCEC9:
+	CALL HB225; STRING '.BYT ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+ "Ajoute '.WOR ' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCED2:
+	CALL HB225; STRING '.WORD ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute POP(H02A1) au tampon H0400 et l'affiche si 2 passes + OUT '+1'";
+" -----------------------------------------------------------------------------";
+
+ HCEDB:
+	CALL HCEE9;
+	CALL HCF42;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute POP(H02A1) au tampon H0400 et l'affiche si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCEE2:
+	CALL HCEE9;
+	CALL HB119;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute POP(H02A1) au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCEE9:
+	CALL HB57E;
+	CALL HCF73;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" 'STA pop(H02A1)'";
+" -----------------------------------------------------------------------------";
+
+ HCEF0:
+	CALL HCF53;
+	CALL HCEE2;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'CMP ' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCEF7:
+	CALL HB225; STRING 'CMP ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'DEC ' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCEFF:
+	CALL HB225; STRING 'DEC ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'INC ' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCF07:
+	CALL HB225; STRING 'INC ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'JMP ' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCF0F:
+	CALL HB225; STRING 'JMP ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'LDA ' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCF17:
+	CALL HB225; STRING 'LDA ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute ' *=*' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCF1F:
+	CALL HB225; STRING ' *=*';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'LDY #0' au tampon H0400 et l'affiche si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF27:
+	CALL HB21E; STRING 'LDY #0';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'LDX #0' au tampon H0400 et l'affiche si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF31:
+	CALL HB21E; STRING 'LDX #0';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'PHA' au tampon H0400 et l'affiche si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF3B:
+	CALL HB21E; STRING 'PHA';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute '+1' au tampon H0400 et l'affiche si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF42:
+	CALL HB21E; STRING '+1';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute '+2' au tampon H0400 et l'affiche si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF48:
+	CALL HB21E; STRING '+2';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute '' ' '' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCF4E:
+	CALL HB225; STRING '''';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'STA ' au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCF53:
+	CALL HB225; STRING 'STA ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute ' *+5' au tampon H0400 et l'affiche si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF5B:
+	CALL HB21E; STRING ' *+5';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" OUT2 'STA R0'";
+" -----------------------------------------------------------------------------";
+
+ HCF63:
+	CALL HCF53;
+	CALL HB225; STRING 'R0';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" OUT2 'STA R0' et affiche le tampon H0400 si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF6C:
+	CALL HCF63;
+	CALL HB119;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute le contenu du tampon H0200 au tampon H0400";
+" -----------------------------------------------------------------------------";
+
+ HCF73:
+	CALL HB225; STRING '*';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute le contenu du tampon H0200 au tampon H0400 et l'affiche si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF78:
+	CALL HCF73;
+	CALL HB119;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" OUT2 '0' + affichage du tampon H0400 si 2 passes";
+" -----------------------------------------------------------------------------";
+
+ HCF7F:
+	CALL HB225; STRING '0';
+	CALL HB119;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" 'CMP pop(H02A1)\n'";
+" -----------------------------------------------------------------------------";
+
+ HCF87:
+	CALL HCEF7;
+	CALL HCEE2;
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute '#' dans le tampon H0250";
+" -----------------------------------------------------------------------------";
+
+ HCF8E:
+	CALL HB468; STRING '#';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute le contenu du tampon H0200 dans le tampon H0250";
+" -----------------------------------------------------------------------------";
+
+ HCF93:
+	CALL HB468; STRING '*';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute 'BEQ ' dans le tampon H02A1";
+" -----------------------------------------------------------------------------";
+
+ HCF98:
+	CALL HB4C4; STRING 'BEQ ';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute le contenu du tampon H0250 dans le tampon H02A1";
+" -----------------------------------------------------------------------------";
+
+ HCFA0:
+	CALL HB4C4; STRING '%';
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Ajoute le contenu du tampon H0200 dans le tampon H02A1";
+" -----------------------------------------------------------------------------";
+
+ HCFA5:
+	CALL HB4C4; STRING '*';
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+ "HCFAA:";
+" -----------------------------------------------------------------------------";
+	DATA $00,$00,$00,$00,$00,$00;
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+ HCFB0:
+	DATA $0D, 'AIM 65  PL/65  V1.0', $00;
+
+
+" -----------------------------------------------------------------------------";
+" Externals";
+" -----------------------------------------------------------------------------";
+ EXTENSIONS:
+	CALL CLR_Cmd;
+	IF .O THEN CALL STRING_Cmd;
+	IF .O THEN CALL WAIT_Cmd;
+	IF .O THEN CALL PULSE_Cmd;
+	IF .O THEN CALL REPEAT_Cmd;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'CLR .reg' (nouvelle)";
+" -----------------------------------------------------------------------------";
+" Patch pour CLR .D/.C/.I/.O/.A/.X/.Y";
+"	CLR BIT[nn] OF <id>";
+" -----------------------------------------------------------------------------";
+
+
+" CLR BIT[$C0] OF FLAGS";
+" LDA #$C0";
+" EOR #$FF";
+" AND FLAGS";
+" STA FLAGS";
+CLR_Cmd:
+
+	CALL HCLEAR;
+	IF ^.O THEN
+	BEGIN;
+		CALL HBITS;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF17;
+			CALL HCCE1;
+			BRK;
+			BEGIN;
+				CALL HCFA0;
+				CALL HCEE2;
+				CALL HB1C9; STRING ']';
+				BRK;
+				CALL HB1C9; STRING 'OF';
+				BRK;
+				CALL HOUT_EOR_FF;
+				CALL HC72C;
+				CALL HC441;
+				BRK;
+				CALL HB119;
+				CALL HCF53;
+				GOTO HCF78;
+			END;
+			"erreur:";
+			"RETURN;";
+		END;
+
+		"CLR .C;";
+		CALL HFLAGC;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'CLC';
+			RETURN;
+		END;
+
+		"CLR .D;";
+		CALL HFLAGD;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'CLD';
+			RETURN;
+		END;
+
+		"CLR .I;";
+		CALL HFLAGI;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'CLI';
+			RETURN;
+		END;
+
+		"CLR .O;";
+		CALL HFLAGV;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'CLV';
+			RETURN;
+		END;
+
+		"CLR .A;";
+		CALL HREGA;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF17;
+			CALL HB21E; STRING '#0';
+			RETURN;
+		END;
+
+		"CLR .X;";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			GOTO HCF31;
+		END;
+
+		"CLR .Y;";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			GOTO HCF27;
+		END;
+
+		RETURN;
+	END;
+
+	"A faire suivre par 'SET .reg'";
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'SET .reg' (nouvelle)";
+" -----------------------------------------------------------------------------";
+" Patch pour SET .D/.C/.I/.A/.X/.Y";
+"	SET/CLR BITS[nn] OF <id>";
+" -----------------------------------------------------------------------------";
+
+
+" SET BIT[$08] OF FLAGS";
+" LDA #$08";
+" ORA FLAGS";
+" STA FLAGS";
+
+SET_Cmd:
+	CALL HSET;
+	IF ^.O THEN
+	BEGIN;
+		CALL HBITS;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF17;
+			CALL HCCE1;
+			BRK;
+			BEGIN;
+				CALL HCFA0;
+				CALL HCEE2;
+				CALL HB1C9; STRING ']';
+				BRK;
+				CALL HB1C9; STRING 'OF';
+				BRK;
+				CALL HB225; STRING 'ORA ';
+				CALL HC441;
+				BRK;
+				CALL HB119;
+				CALL HCF53;
+				GOTO HCF78;
+			END;
+			"erreur:";
+			"RETURN;";
+		END;
+
+		"Saut vers la suite";
+		IFF .O THEN SET_Flags;
+
+	END;
+
+	"Ascenseur vers IFF_Cmd, sinon le BVS au début de SET_Cmd est trop loin de 5 octets..";
+	"TODO: ré-ecrire SET_Cmd";
+	IFF .O THEN IFF_Cmd;
+
+	SET_Flags:
+	BEGIN;
+		"SET .C;";
+		CALL HFLAGC;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'SEC';
+			RETURN;
+		END;
+
+		"SET .D;";
+		CALL HFLAGD;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'SED';
+			RETURN;
+		END;
+
+		"SET .I;";
+		CALL HFLAGI;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'SEI';
+			RETURN;
+		END;
+
+		"SET .A;";
+		CALL HREGA;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCF17;
+ AREGFF:
+			CALL HB21E; STRING '#$FF';
+			RETURN;
+		END;
+
+		"SET .X;";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_LDX;
+			GOTO AREGFF;
+		END;
+
+		"SET .Y;";
+		CALL HREGY;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_LDY;
+			GOTO AREGFF;
+		END;
+
+		RETURN;
+	END;
+
+	"A faire suivre par 'IFF xxx'";
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'IFF xxx THEN label' (nouvelle)";
+" -----------------------------------------------------------------------------";
+" Patch pour IFF";
+" CCB3 JSR HC23B -> JSR d000 ; supprime .TFILE .DFILE";
+" -----------------------------------------------------------------------------";
+
+" IFF <, >=, =, ^=";
+" IFF .C, .O, .N, .Z";
+" IFF +, -";
+
+" IFF .reg <relopr> <val>";
+
+IFF_Cmd:
+	CALL HB1C9; STRING 'IFF ';
+	IF .O THEN
+	BEGIN;
+		'NOP';
+		'NOP';
+		RETURN;
+	END;
+
+	CALL HREGA;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB225; STRING 'CMP ';
+		IFF ^.O THEN IFF_RegsOper;
+	END;
+
+	CALL HREGX;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB225; STRING 'CPX ';
+		IFF ^.O THEN IFF_RegsOper;
+	END;
+
+	CALL HREGY;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB225; STRING 'CPY ';
+		IFF_RegsOper:
+		CALL HCA21;
+		BRK;
+		CALL HCCE1;
+		BRK;
+		CALL HCFA0;
+		CALL HCEE2;
+		IFF ^.O THEN IFF_Then;
+	END;
+
+ "IFF_RelOper:";
+	CALL HCA21;
+	IFF ^.O THEN IFF_Then;
+
+ "IFF_Flags:";
+	CALL HNOT;
+	IFF ^.O THEN IFF_Clear;
+
+ "IFF_Set";
+	"IFF .C";
+	CALL HFLAGC;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCA36;
+		IFF ^.O THEN IFF_Then;
+	END;
+
+	"IFF .O";
+	CALL HFLAGV;
+	IF ^.O THEN
+	BEGIN;
+		Overflow_asm:
+		CALL HB4C4; STRING 'BVS ';
+		IFF ^.O THEN IFF_Then;
+	END;
+
+	"IFF .N";
+	CALL HFLAGN;
+	IF ^.O THEN
+	BEGIN;
+		Negative_asm:
+		CALL HB4C4; STRING 'BMI ';
+		IFF ^.O THEN IFF_Then;
+	END;
+
+	"IFF -";
+	CALL HB1C9; STRING '-';
+	IFF ^.O THEN Negative_asm;
+
+	"IFF .Z";
+	CALL HFLAGZ;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF98;
+		IFF ^.O THEN IFF_Then;
+	END;
+
+	"IFF +";
+	CALL HB1C9; STRING '+';
+	IFF ^.O THEN Plus_asm;
+
+	"IFF BIT[]";
+	CALL HBIT;
+	BRK;
+	BEGIN;
+		CALL HB225; STRING 'BIT ';
+		CALL HC441;
+		BRK;
+		BEGIN;
+			CALL HB1C9; STRING ']';
+			BRK;
+			CALL HB119;
+			IFF ^.O THEN Not_Zero_asm;
+		END;
+	END;
+
+	RETURN;
+
+ "Place ici sinon les 'BVC IFF_Then' sont trop loin";
+ IFF_Then:
+	CALL HB1C9; STRING 'THEN ';
+	BRK;
+
+	CALL HGOTO;
+	CLR .O;
+
+	CALL HCEE9;
+	CALL HC441;
+	BRK;
+	CALL HB119;
+	RETURN;
+
+
+ IFF_Clear:
+
+	"IFF ^.C";
+	CALL HFLAGC;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCA27;
+		IFF ^.O THEN IFF_Then;
+	END;
+
+	"IFF ^.O";
+	CALL HFLAGV;
+	IF ^.O THEN
+	BEGIN;
+		Not_Overflow_asm:
+		CALL HB4C4; STRING 'BVC ';
+		IFF ^.O THEN IFF_Then;
+	END;
+
+	"IFF ^.N";
+	CALL HFLAGN;
+	IF ^.O THEN
+	BEGIN;
+		Plus_asm:
+		CALL HB4C4; STRING 'BPL ';
+		IFF ^.O THEN IFF_Then;
+	END;
+
+	"IFF ^.Z";
+	CALL HFLAGZ;
+	IF ^.O THEN
+	BEGIN;
+		Not_Zero_asm:
+		CALL HCA4F;
+		IFF ^.O THEN IFF_Then;
+	END;
+
+	"IFF BIT[]";
+	CALL HBIT;
+	BRK;
+	BEGIN;
+		CALL HB225; STRING 'BIT ';
+		CALL HC441;
+		BRK;
+		BEGIN;
+			CALL HB1C9; STRING ']';
+			BRK;
+			CALL HB119;
+			CALL HCF98;
+			IFF ^.O THEN IFF_Then;
+		END;
+	END;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'STRING 'Message' (nouvelle)";
+" -----------------------------------------------------------------------------";
+
+" STRING 'Message'";
+" Génère une instruction '.byt' avec le bit7 du dernier caractère à 1";
+
+" -----------------------------------------------------------------------------";
+" Détournemnt en CC67:";
+"	CC67 JSR HBF85 -> JSR DATA_Patch";
+" -----------------------------------------------------------------------------";
+
+STRING_Cmd:
+	CALL HB1C9; STRING 'STRING ';
+	IF ^.O THEN
+	BEGIN;
+		CALL HCEC9;
+		CALL Do_STRING;
+		BRK;
+
+		"Pour la boucle suivante,il faudrait WHILE .flag";
+		LOOP:
+		IF ^.O THEN
+		DO;
+			CALL HB1C9; STRING ',';
+			IF ^.O THEN
+			BEGIN;
+				CALL HCF73;
+				CALL Do_STRING;
+				BRK;
+			END;
+			GOTO LOOP;
+		END;
+
+		CLR .O;
+		CALL HB119;
+		RETURN;
+	END;
+	RETURN;
+
+ Do_STRING:
+	CALL HB313;
+	IF ^.O THEN
+	BEGIN;
+		CALL HCF4E;
+		Z02-1;
+		CALL HCF73;
+		CALL HCF4E;
+
+		'.ifdef STRING_CHAR';
+		CALL HB225; STRING ', ''';
+		.X = Z02;
+		Z00 = H0200[.X];
+		CALL HB8F5;
+		CALL HB225; STRING '''''+$80';
+
+		'.else';
+		CALL HB225; STRING ',$';
+		.X = Z02;
+		'LDA H0200,X';
+		'ORA #$80';
+		CALL HexToASCII;
+		STACK .A;
+		Z00 = .X; CALL HB8F5;
+		UNSTACK .A;
+		Z00 =.A; CALL HB8F5;
+		'.endif';
+
+		CALL HB1C9; STRING '''';
+		BRK;
+		RETURN;
+	END;
+
+	BRK;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'WAIT ON...' (nouvelle)";
+" -----------------------------------------------------------------------------";
+
+" WAIT ON [ANY|ALL] BIT[var] [SET|CLEAR] OF name";
+
+" 00 x ff & 3 -> 3";
+" 01 x ff & 3 -> 2";
+" 10 x ff & 3 -> 1";
+" 11 x ff & 3 -> 0";
+
+" WAIT ON ALL BIT[var]     OF name";
+" WAIT ON ALL BIT[var] SET OF name";
+"	WaitOnAllSet";
+"		lda name";
+"		eor #$ff";
+"		and var";
+"		bne WaitOnAllSet";
+
+" WAIT ON     BIT[var] CLEAR OF name";
+" WAIT ON ANY BIT[var] CLEAR OF name";
+"	WaitOnAnyClear";
+"		lda name";
+"		eor #$ff";
+"		and var";
+"		beq WaitOnAnyClear";
+
+
+" 00 x 00 & 3 -> 0";
+" 01 x 00 & 3 -> 1";
+" 10 x 00 & 3 -> 2";
+" 11 x 00 & 3 -> 3";
+
+" WAIT ON ALL BIT[var] CLEAR OF name";
+"	WaitOnAllClear";
+"		lda name";
+"		;eor select	; #$00";
+"		and var";
+"		bne WaitOnAllClear";
+
+" WAIT ON     BIT[var]     OF name";
+" WAIT ON ANY BIT[var]     OF name";
+" WAIT ON ANY BIT[var] SET OF name";
+"	WaitOnAnySet";
+"		lda name";
+"		;eor select	; #$00";
+"		and var";
+"		beq WaitOnAnySet";
+
+" ALL -> bne";
+" ANY -> beq";
+
+" -----------------------------------------------------------------------------";
+" Détournemnt de 'PAGE' en :";
+"	CCBF JSR HC7AF -> JSR WAIT_Cmd";
+" -----------------------------------------------------------------------------";
+WAIT_Cmd:
+	CALL HB1C9; STRING 'WAIT ';
+	IF .O THEN RETURN;
+
+	CALL HB1C9; STRING 'ON ';
+	BRK;
+
+	"Z23 <=> R2 si ENTRY ,$20";
+	Z23 = 0;
+
+	CALL HB1C9; STRING 'ALL ';
+	IF ^.O THEN CALL HCA4F;
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING 'ANY ';
+		CLR .O;
+		INC Z23;
+		CALL HCF98;
+	END;
+
+	CALL HBITS;
+	BRK;
+
+	CALL HCEBD;
+	CALL HCF17;
+	CALL HCCE1;
+	BRK;
+	CALL HCFA0;
+	CALL HCEE2;
+	CALL HB1C9; STRING ']';
+	BRK;
+
+	CALL HCLEAR;
+	IF ^.O THEN
+	BEGIN;
+		DEC Z23;
+		IF .Z THEN
+		BEGIN;
+			OUT_EOR:
+			CALL HOUT_EOR_FF;
+		END;
+	END;
+
+	IF .O THEN
+	BEGIN;
+		CALL HSET;
+		CLR .O;
+		DEC Z23;
+		IFF ^.Z THEN OUT_EOR;
+	END;
+
+	CALL HB1C9; STRING 'OF ';
+	BRK;
+	CALL HC72C;
+	CALL HC441;
+	BRK;
+	CALL HB119;
+
+	CALL HCEE9;
+	CALL HCEAF;
+	CALL HCFA0;
+	CALL HCEE2;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'PULSE BIT[]...' (nouvelle)";
+" -----------------------------------------------------------------------------";
+
+" PULSE BIT[var] [SET|CLEAR] OF name";
+
+" PULSE BIT[var] OF name";
+"	CLR BIT[var] OF name -> LDA var / EOR #$FF / AND name / STA name";
+"	SET BIT[var] OF name -> LDA var / ORA name / STA name -> ORA var / STA name";
+
+" PULSE BIT[var] CLR OF name";
+"	SET BIT[var] OF name -> LDA var / ORA name / STA name";
+"	CLR BIT[var] OF name -> LDA var / EOR #$FF / AND name / STA name";
+" -----------------------------------------------------------------------------";
+PULSE_Cmd:
+	CALL HB1C9; STRING 'PULSE ';
+	IF .O THEN RETURN;
+
+	CALL HBITS;
+	BRK;
+
+	CALL HCCE1;
+	BRK;
+	CALL HCFA0;
+
+	"LDA var";
+	CALL HCAF3;
+
+	CALL HCFA5;
+
+	CALL HB1C9; STRING ']';
+	BRK;
+	CALL HCLEAR;
+	IF ^.O THEN
+	BEGIN;
+		"Pulse_Clear";
+		CALL HB1C9; STRING 'OF';
+		BRK;
+
+		CALL HC739;
+		CALL HC441;
+		BRK;
+		CALL HB119;
+
+		CALL HCFA5;
+		CALL HCEF0;
+		CALL HCF93;
+
+		CALL HCAF3;
+
+		CALL HOUT_EOR_FF;
+		CALL HC72C;
+		CALL HCFA0;
+		CALL HB577;
+	END;
+
+	IF .O THEN
+	BEGIN;
+		CALL HSET;
+		CLR .O;
+		CALL HB1C9; STRING 'OF ';
+		BRK;
+
+		CALL HOUT_EOR_FF;
+
+		"AND name";
+		CALL HC72C;
+		CALL HC441;
+		BRK;
+		CALL HB119;
+
+		"STA name";
+		CALL HCF93;
+		CALL HCF53;
+		CALL HCF78;
+
+		"ORA var";
+		CALL HC739;
+		CALL HB57E;
+		CALL HCFA0;
+	END;
+
+	CALL HCF78;
+	CALL HCEF0;
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'REPEAT... UNTIL flag' (nouvelle)";
+" -----------------------------------------------------------------------------";
+
+" REPEAT; instruction; UNTIL flag | <reg> <reloper> <value>;";
+" REPEAT; DO; instruction; instruction; END; UNTIL flag | <reg> <reloper> <value>;";
+" -----------------------------------------------------------------------------";
+" Version SHORT uniquement si 'UNTIL flag' (ie le bloc 'xxx' fait moins de 127 octets)";
+" Version LONG uniquement si 'UNTIL <reg> <reloper> <value>'";
+
+" TODO: Faire la version LONG?";
+" -----------------------------------------------------------------------------";
+REPEAT_Cmd:
+	CALL HB1C9; STRING 'REPEAT;';
+	IF .O THEN RETURN;
+
+	CALL HCEBD;
+	CALL HB119;
+	CALL HCEAF;
+	CALL HCFA0;
+
+	CALL HBD76;
+	IF .O THEN CALL HCC67;
+
+	BRK;
+
+	CALL HB1C9; STRING 'UNTIL ';
+	BRK;
+
+	CALL TEST_Flags;
+	BRK;
+
+	CALL HCEE9;
+	CALL HCEE2;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'id = .reg' (patch)";
+" -----------------------------------------------------------------------------";
+
+" -----------------------------------------------------------------------------";
+"Patch id = .reg";
+
+" Entrée:";
+"	id en H0200 et H02A1";
+id_reg_Patch:
+	CALL HEQUAL;
+	IF ^.O THEN
+	BEGIN;
+		CALL HREGA;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCEF0;
+			GOTO HBA4E;
+		END;
+
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STX;
+			IFF ^.O THEN EXITOK;
+		END;
+
+		CALL HREGY;
+		IF ^.O THEN
+		BEGIN;
+			CALL OUT_STY;
+ EXITOK:
+			CALL HCEE2;
+			GOTO HBA4E;
+		END;
+
+		CLR .O;
+		CALL HBAAD;
+	END;
+	GOTO HBA1A;
+
+" -----------------------------------------------------------------------------";
+"			Instruction 'IF .flag THEN xxx [ELSE yyy]' (patch) ";
+" -----------------------------------------------------------------------------";
+
+" PY65: c.onecmd('assemble bdfb jmp %IF_Patch%')";
+
+" -----------------------------------------------------------------------------";
+" Modifier HBDFB";
+" BDFB 20 E1 CC		JSR HCCE1";
+" BDFB 4C xx xx		JMP IF_Patch";
+" -----------------------------------------------------------------------------";
+
+" IF <, >=, =, ^=";
+" IF .C, .O, .N, .Z";
+" IF +, -";
+
+" IF .reg <relopr> <val>";
+" IF BIT[id|val] OF id THEN";
+
+" -----------------------------------------------------------------------------";
+" Version SHORT uniquement (ie le bloc 'THEN xxx' fait moins de 127 octets)";
+
+" TODO: Faire la version LONG?";
+" -----------------------------------------------------------------------------";
+IF_Patch:
+	CALL TEST_Flags;
+	IF ^.O THEN
+ 	BEGIN;
+		IF_Flags:
+		CALL HCEE9;
+		CALL HCEBD;
+		CALL HCEAF;
+		CALL HCFA0;
+		CALL HB119;
+		GOTO HBE2A;
+	END;
+
+IF_BIT:
+	CALL HBITS;
+	IF ^.O THEN
+	DO;
+		CALL HCCE1;
+		BRK;
+		CALL HCF17;
+		CALL HCFA0;
+		CALL HCEE2;
+		CALL HB1C9; STRING ']';
+		BRK;
+		CALL HB1C9; STRING 'OF ';
+		BRK;
+		"";
+		" Je ne sais pas si la version d'origine utilisait";
+		" l'intruction BIT ou AND.";
+		" Comme IFF BIT[] utilisait BIT, je suppose que IF BIT[] aussi";
+		"";
+		" à remplacer éventuellement par un JSR HC72C  ; OUT2 'AND '";
+		"";
+		CALL HB225; STRING 'BIT ';
+
+		CALL HC441;
+		BRK;
+		CALL HB119;
+		" Saut court";
+		CALL HCF98;
+		IFF ^.O THEN IF_Flags;
+	END;
+ IF_Normal:
+	CLR .O;
+	CALL HCCE1;
+	GOTO HBDFE;
+
+
+" -----------------------------------------------------------------------------";
+"			Instruction '.reg = .reg|val' ";
+"			'.A = @id[.reg]|@val[.reg]|id[.reg]' (patch) ";
+"			'.regs <- id' ";
+"			'.regs =## id' ";
+" -----------------------------------------------------------------------------";
+
+" PY65: c.onecmd('assemble b9fb jmp %RegReg_Patch%') ";
+
+" -----------------------------------------------------------------------------";
+"Patch .reg = .reg|val ";
+
+RegReg_Patch:
+
+	CALL To_Regs;
+	IF ^.O THEN GOTO HBA4E; "CALL HB1C9; STRING ';'; BRK; BRK; RETURN;";
+
+".X=";
+	CALL HREGX;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB1C9; STRING '+';
+		IF ^.O THEN
+		BEGIN;
+			";	JSR HCEC4		; Set Z04 := $FF";
+			" Token '1;'?";
+			CALL HCE9A;
+			IFF .O THEN Erreur;
+			GOTO OUT_INX;
+		END;
+
+		"X_DEC";
+			CALL HB1C9; STRING '-';
+			IF ^.O THEN
+			BEGIN;
+				";	JSR HCEC4		; Set Z04 := $FF";
+				" Token '1;'?";
+				CALL HCE9A;
+				IFF .O THEN Erreur;
+				GOTO OUT_DEX;
+
+			END;
+
+		"X_EQ";
+			CALL HEQUAL;
+			BRK;
+			"TAX_";
+			" .X = .A?";
+			CALL HREGA;
+			IF ^.O THEN
+			BEGIN;
+				;
+				CALL OUT_TAX;
+				"; Ou";
+				";	CALL HB21E		; OUT 'TAX'";
+				";	STRING 'TAX';";
+				IFF ^.O THEN  reg_ok;
+			END;
+
+		"TSX_";
+			".X = .S?";
+			CALL HREGS;
+			IF ^.O THEN
+			BEGIN;
+				"OUT 'TXS'";
+				CALL HCC0D;
+				"; Ou";
+				";	CALL HB21E;";
+				";	STRING 'TSX';";
+				IFF ^.O THEN reg_ok;
+			END;
+
+		"X_value";
+			".X = val?";
+			"OUT2 'LDX ';";
+			CALL OUT_LDX;
+			IFF ^.O THEN reg_value;
+
+	END;
+
+".Y=";
+	CALL HREGY;
+	IF ^.O THEN
+	DO;
+		CALL HB1C9; STRING '+';
+
+		IF ^.O THEN
+		BEGIN;
+			"CALL HCEC4		; Set Z04 := $FF";
+			"Token '1;'?";
+			CALL HCE9A;
+			IFF .O THEN Erreur;
+			"Trop loin pour un BVC OUT_INY :(";
+			GOTO OUT_INY;
+		END;
+
+		"Y_DEC";
+			CALL HB1C9; STRING '-';
+
+			IF ^.O THEN
+			BEGIN;
+				"JSR HCEC4		; Set Z04 := $FF";
+				"Token '1;'?";
+				CALL HCE9A;
+				IFF .O THEN Erreur;
+				GOTO OUT_DEY;
+			END;
+		"Y_EQ";
+			CALL HEQUAL;
+			BRK;
+			"TAY_";
+			".Y = ?A?";
+			CALL HREGA;
+			IF ^.O THEN
+			BEGIN;
+				CALL OUT_TAY;
+				IFF ^.O THEN reg_ok;
+			END;
+
+		"Y_value";
+			".Y = val?";
+			CALL OUT_LDY;
+			IFF ^.O THEN reg_value;
+
+	END;
+
+".S=";
+	CALL HREGS;
+	IF ^.O THEN
+	DO;
+		CALL HEQUAL;
+		BRK;
+		".S = .X?";
+		CALL HREGX;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB21E; STRING 'TSX';
+			IFF ^.O THEN reg_ok;
+		END;
+	Erreur:
+		BRK;
+		RETURN;
+
+	reg_value:
+		".reg = val?";
+		"Valeur numerique ou id (-> H0250)";
+		CALL HCCE1;
+		IFF .O THEN Erreur;
+
+		"H0400 += H0250";
+		CALL HB225; STRING '%';
+
+	reg_ok:
+		"DISP(H0400)";
+		CALL HB119;
+
+		"GOTO HBA4E";
+		CALL HBA4E;
+		BRK;
+		RETURN;
+
+	END;
+
+".A=";
+	CALL HREGA;
+	IF ^.O THEN
+	BEGIN;
+		CALL HEQUAL;
+		BRK;
+		"TXA_";
+			".A = .X?";
+			CALL HREGX;
+			IF ^.O THEN
+			BEGIN;
+				CALL OUT_TXA;
+				IFF ^.O THEN reg_ok;
+			END;
+		"TYA_";
+			".A = .Y?";
+			CALL HREGY;
+			IF ^.O THEN
+			BEGIN;
+				CALL OUT_TYA;
+				IFF ^.O THEN reg_ok;
+			END;
+		"A_Indirect";
+			"OUT2 'LDA '";
+			CALL HCF17;
+			CALL HB1C9; STRING '@';
+			IF ^.O THEN
+			BEGIN;
+				"OUT2 '('";
+				CALL HB225; STRING '(';
+				"Identifiant uniquement";
+				"	CALL HC441; Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+				" Autorise un identifiant ou une valeur numerique";
+				" /!\ On peut saisir une valeur négative: .A = @-45[.Y] !!!";
+				"Identifiant ou valeur numérique (hexa,binaire, décimale, résultat dans le tampon H0400)?";
+				CALL HC46C;
+
+				"Avec controle des valeurs numeriques";
+				"	JSR HC4B0 ; Valeur numérique positive (hexa, binaire, décimal, résultat dans le tampon H0400)?";
+				"	BVC *+5";
+				"	JSR HC441 ; Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+
+				BRK;
+				CALL HB1C9; STRING '[';
+				BRK;
+				CALL HREGX;
+				IF ^.O THEN
+				BEGIN;
+					"OUT2 ',X)'";
+					CALL HB225; STRING ',X)';
+					IFF ^.O THEN CloseBracket;
+				END;
+				"A_IndirectY";
+					CALL HREGY;
+					BRK;
+					CALL HB225; STRING '),Y';
+					IFF ^.O THEN CloseBracket;
+			END;
+		"A_Index";
+			"Identifiant uniquement";
+			"Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+			CALL HC441;
+
+			" A voir, si on active ce qui suit, on ne peut pas avoir: .A = $45 -> LDA #$45";
+
+			" Autorise un identifiant ou une valeur numerique";
+			" /!\ On peut saisir une valeur négative: .A = @-45[.Y] !!!";
+			"	JSR HC46C; Identifiant ou valeur numérique (hexa,binaire, décimale, résultat dans le tampon H0400)?";
+
+			" Avec controle des valeurs numeriques";
+			"	JSR HC4B0 ; Valeur numérique positive (hexa, binaire, décimal, résultat dans le tampon H0400)?";
+			"	BVC *+5 ";
+			"	JSR HC441; Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+
+			IFF .O THEN reg_value;
+			CALL HB1C9; STRING '[';
+			IFF .O THEN reg_ok;
+			CALL HREGX;
+			IF ^.O THEN
+			BEGIN;
+				CALL HB225; STRING ',X';
+				IFF ^.O THEN CloseBracket;
+			END;
+		"A_IndexY";
+			CALL HREGY;
+			IFF .O THEN Erreur;
+			CALL HB225; STRING ',Y';
+
+		CloseBracket:
+			CALL HB1C9; STRING ']';
+			BRK;
+			IFF ^.O THEN reg_ok;
+
+	END;
+
+" Suite analyse de la syntaxe";
+"end_nok";
+	"CALL HB375		; Test initialement en HB9FB";
+	GOTO HB9FE;		"Retour";
+	"RETURN;";
+
+
+" -----------------------------------------------------------------------------";
+" .regs = ##id ";
+" -----------------------------------------------------------------------------";
+
+ _REGAY:
+	CALL HB225; STRING 'LDA #<';
+
+ _REG_Y:
+	CALL HC441;
+	BRK;
+	CALL HB119;
+	CALL HB225; STRING 'LDY #>';
+	IFF ^.O THEN _OUT;
+
+ _REGXY:
+	CALL HB225; STRING 'LDX #<';
+	IFF ^.O THEN _REG_Y;
+
+ _REGAX:
+	CALL HB225; STRING 'LDA #<';
+
+ _REG_X:
+	CALL HC441;
+	BRK;
+	CALL HB119;
+	CALL HB225; STRING 'LDX #>';
+	IFF ^.O THEN _OUT;
+
+ _REGYX:
+	CALL HB225; STRING 'LDY #<';
+	IFF ^.O THEN _REG_X;
+
+ _REGXA:
+	CALL HB225; STRING 'LDX #<';
+
+ _REG_A:
+	CALL HC441;
+	BRK;
+	CALL HB119;
+	CALL HB225; STRING 'LDA #>';
+	IFF ^.O THEN _OUT;
+
+ _REGYA:
+	CALL HB225; STRING 'LDY #<';
+	IFF ^.O THEN _OUT;
+	RETURN;
+
+ _OUT:
+	CALL HCF78;
+	BRK;
+	RETURN;
+
+" =============================================================================";
+"			Routines utilitaires";
+" =============================================================================";
+
+
+" -----------------------------------------------------------------------------";
+
+" TEST <, >=, =, ^=";
+" TEST .C, .O, .N, .Z";
+" TEST +, -";
+
+" TEST .reg <relopr> <val>	(A faire)";
+" -----------------------------------------------------------------------------";
+
+ TEST_Flags:
+	CALL HNOT;
+	IFF ^.O THEN TEST_Clear;
+
+	BEGIN;
+		"IF .C";
+		CALL HFLAGC;
+		IF ^.O THEN
+		BEGIN;
+			TEST_CarryAsm:
+			CALL HCA27;
+			IFF ^.O THEN TEST_Then;
+		END;
+
+		"IF >=";
+		CALL HB1C9; STRING '>=';
+		IFF ^.O THEN TEST_CarryAsm;
+
+		"IF <";
+		CALL HB1C9; STRING '<';
+		IFF ^.O THEN TEST_NotCarryAsm;
+
+		"IF .O";
+		CALL HFLAGV;
+		IF ^.O THEN
+		BEGIN;
+			CALL HB4C4; STRING 'BVC ';
+			IFF ^.O THEN TEST_Then;
+		END;
+
+		"IF .N";
+		CALL HFLAGN;
+		IF ^.O THEN
+		BEGIN;
+			TEST_NegativeAsm:
+			CALL HB4C4; STRING 'BPL ';
+			IFF ^.O THEN TEST_Then;
+		END;
+
+		"IF -";
+		CALL HB1C9; STRING '-';
+		IFF ^.O THEN TEST_NegativeAsm;
+
+		"IF +";
+		CALL HB1C9; STRING '+';
+		IFF ^.O THEN TEST_NotNegativeAsm;
+
+		"IF .Z";
+		CALL HFLAGZ;
+		IF ^.O THEN
+		BEGIN;
+			TEST_ZeroAsm:
+			CALL HCA4F;
+			IFF ^.O THEN TEST_Then;
+		END;
+
+		"IF =";
+		CALL HEQUAL;
+		IFF .O THEN TEST_RegA;
+		IFF ^.O THEN TEST_ZeroAsm;
+
+	END;
+
+ "Place ici sinon les 'BVC TEST_Then' sont trop loin";
+ TEST_Then:
+	RETURN;
+
+ TEST_Clear:
+	"IF ^.C";
+	CALL HFLAGC;
+	IF ^.O THEN
+	BEGIN;
+		TEST_NotCarryAsm:
+		CALL HCA36;
+		IFF ^.O THEN TEST_Then;
+	END;
+
+	"IF ^.O";
+	CALL HFLAGV;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB4C4; STRING 'BVS ';
+		IFF ^.O THEN TEST_Then;
+	END;
+
+	"IF ^.N";
+	CALL HFLAGN;
+	IF ^.O THEN
+	BEGIN;
+		TEST_NotNegativeAsm:
+		CALL HB4C4; STRING 'BMI ';
+		IFF ^.O THEN TEST_Then;
+	END;
+
+	"IF ^.Z";
+	CALL HFLAGZ;
+	IF ^.O THEN
+	BEGIN;
+		TEST_NotZeroAsm:
+		CALL HCF98;
+		IFF ^.O THEN TEST_Then;
+	END;
+
+	"IF ^=";
+	CALL HEQUAL;
+	IFF ^.O THEN TEST_NotZeroAsm;
+
+	"Sortie incorrecte si on a vu 'IF ^'?";
+
+ TEST_RegA:
+	CALL HREGA;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB225; STRING 'CMP ';
+		IFF ^.O THEN TEST_RegsOper;
+	END;
+
+	CALL HREGX;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB225; STRING 'CPX ';
+		IFF ^.O THEN TEST_RegsOper;
+	END;
+
+	CALL HREGY;
+	IF ^.O THEN
+	BEGIN;
+		CALL HB225; STRING 'CMP ';
+
+	 TEST_RegsOper:
+		CALL HCA21;
+		BRK;
+		CALL HCCE1;
+		BRK;
+
+		CALL HCFA0;
+		CALL HCEE2;
+
+		CALL HB57E;
+		CALL HCF73;
+		CALL HCF5B;
+		CALL HB4C4; STRING 'JMP ';
+	END;
+
+ TEST_End:
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+To_Regs:
+To_AY:
+	CALL HREGAY;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGAY;
+
+		CALL HSTOREW;
+		BRK;
+		"OUT2 'LDA '";
+		CALL HCF17;
+
+To__Y:
+		CALL HC441;
+		BRK;
+		CALL HB119;
+		CALL OUT_LDY;
+
+To___:
+		CALL HCF93;
+		CALL HCFA0;
+		CALL HCEDB;
+		RETURN;
+	END;
+
+"To_XY";
+	CALL HREGXY;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGXY;
+
+		CALL HSTOREW;
+		BRK;
+		CALL OUT_LDX;
+		IFF ^.O THEN To__Y;
+	END;
+
+
+"To_AX";
+	CALL HREGAX;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGAX;
+
+		CALL HSTOREW;
+		BRK;
+		CALL HCF17;
+
+To__X:
+		CALL HC441;
+		BRK;
+		CALL HB119;
+		CALL OUT_LDX;
+
+To____:
+		IFF ^.O THEN To___;
+	END;
+
+
+"To_YX";
+	CALL HREGYX;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGYX;
+
+		CALL HSTOREW;
+		BRK;
+		CALL OUT_LDY;
+		IFF ^.O THEN To__X;
+	END;
+
+"To_XA";
+	CALL HREGXA;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O THEN GOTO _REGXA;
+
+		CALL HSTOREW;
+		BRK;
+		CALL OUT_LDX;
+
+To__A:
+		CALL HC441;
+		BRK;
+		CALL HB119;
+		CALL HCF17;
+		IFF ^.O THEN To____;
+	END;
+
+"To_YA";
+	CALL HREGYA;
+	IF ^.O THEN
+	BEGIN;
+		CALL HSTOREW2;
+		IF ^.O  THEN GOTO _REGYA;
+
+		CALL HSTOREW;
+		BRK;
+		CALL OUT_LDY;
+		IFF ^.O THEN To__A;
+	END;
+
+"To___End";
+	RETURN;
+
+
+" -----------------------------------------------------------------------------";
+" Registres 6502";
+" -----------------------------------------------------------------------------";
+
+ HREGA:
+ 	CALL HB1C9; STRING '.A';
+	RETURN;
+
+ HREGP:
+ 	CALL HB1C9; STRING '.P';
+	RETURN;
+
+ HREGS:
+ 	CALL HB1C9; STRING '.S';
+	RETURN;
+
+ HREGX:
+ 	CALL HB1C9; STRING '.X';
+	RETURN;
+
+ HREGY:
+ 	CALL HB1C9; STRING '.Y';
+	RETURN;
+
+ HREGAX:
+ 	CALL HB1C9; STRING '.AX';
+	RETURN;
+
+ HREGAY:
+ 	CALL HB1C9; STRING '.AY';
+	RETURN;
+
+ HREGXA:
+ 	CALL HB1C9; STRING '.XA';
+	RETURN;
+
+ HREGXY:
+ 	CALL HB1C9; STRING '.XY';
+	RETURN;
+
+ HREGYA:
+ 	CALL HB1C9; STRING '.YA';
+	RETURN;
+
+ HREGYX:
+ 	CALL HB1C9; STRING '.XY';
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" Flags 6502";
+" -----------------------------------------------------------------------------";
+ HFLAGC:
+ 	CALL HB1C9; STRING '.CARRY';
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '.C';
+	END;
+
+	RETURN;
+
+ HFLAGD:
+ 	CALL HB1C9; STRING '.DECIMAL';
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '.D';
+	END;
+
+	RETURN;
+
+ HFLAGI:
+ 	CALL HB1C9; STRING '.INTERRUPT';
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '.I';
+	END;
+
+	RETURN;
+
+ HFLAGN:
+ 	CALL HB1C9; STRING '.NEGATIVE';
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '.N';
+	END;
+
+	RETURN;
+
+ HFLAGV:
+ 	CALL HB1C9; STRING '.OVERFLOW';
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '.O';
+
+		IF .O THEN
+		BEGIN;
+			CALL HB1C9; STRING '.V';
+		END;
+	END;
+
+	RETURN;
+
+ HFLAGZ:
+ 	CALL HB1C9; STRING '.ZERO';
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '.Z';
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+ HEQUAL:
+	CALL HB1C9; STRING '=';
+	RETURN;
+
+ HSTOREW:
+	CALL HB1C9; STRING '<-';
+	RETURN;
+
+ HSTOREW2:
+	CALL HB1C9; STRING '=';
+
+	IF ^.O THEN
+	BEGIN;
+		CALL HB1C9; STRING '##';
+	END;
+
+	RETURN;
+
+ HBITS:
+	CALL HB1C9; STRING 'BITS[';
+
+	IF .O THEN
+	BEGIN;
+ HBIT:
+		CALL HB1C9; STRING 'BIT[';
+	END;
+
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+ HCLEAR:
+	CALL HB1C9; STRING 'CLEAR ';
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING 'CLR ';
+	END;
+	RETURN;
+
+ HSET:
+	CALL HB1C9; STRING 'SET ';
+	RETURN;
+
+ HNOT:
+	CALL HB1C9; STRING '.NOT ';
+
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING '^';
+	END;
+
+	RETURN;
+
+ HGOTO:
+	CALL HB1C9; STRING 'GOTO ';
+	IF .O THEN
+	BEGIN;
+		CALL HB1C9; STRING 'GO TO ';
+	END;
+
+	RETURN;
+
+ HLEFT:
+	CALL HB1C9; STRING 'LEFT ';
+	RETURN;
+
+ HRIGHT:
+	CALL HB1C9; STRING 'RIGHT ';
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+ HOUT_EOR_FF:
+	CALL HB21E; STRING 'EOR #$FF';
+	RETURN;
+
+ HexToASCII:
+	STACK .A;
+	SHR A;
+	SHR A;
+	SHR A;
+	SHR A;
+	CALL ASCII;
+	.X = .A;
+	UNSTACK .A;
+	'AND #$0f';
+ ASCII:
+	CLR .C;
+	'ADC #"0"';
+	IFF .A < $3A THEN FIN;
+	'ADC #$06';
+ FIN:
+	RETURN;
+
+" -----------------------------------------------------------------------------";
+" -----------------------------------------------------------------------------";
+OUT_LDX:
+	CALL HB225; STRING 'LDX ';
+	RETURN;
+
+OUT_LDY:
+	CALL HB225; STRING 'LDY ';
+	RETURN;
+
+OUT_TXA:
+	CALL HB21E; STRING 'TXA';
+	RETURN;
+
+OUT_TYA:
+	CALL HB21E; STRING 'TYA';
+	RETURN;
+
+OUT_STX:
+	CALL HB225; STRING 'STX ';
+	RETURN;
+
+OUT_STY:
+	CALL HB225; STRING 'STY ';
+	RETURN;
+
+EXIT;
+

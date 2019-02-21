@@ -8,6 +8,7 @@ PL65-v1.3.plm | Ajout SET, CLR, STRING, id=.reg, minuscules et _ pour les identi
 PL65-v1.4.plm | idem v1.3 mais utilise les nouvelles instructions de la v1.3
 PL65-v1.5.plm | Ajout INC .reg, DEC .reg, STACK .reg, UNSTACK .reg, id1=id2[.X|.Y], .reg=.reg|val, .regs<-id, .regs=##id, id<-.regs
 PL65-v1.6.plm | idem v1.5 mais utilise les nouvelles instructions de la v1.5
+PL65-v1.7.plm | Ajout: WHILE .flag, WAIT ON BIT, PULSE BIT, REPEAT...UNTIL, CODE; alias: GO TO, CASE, BREAK, .XOR, INITIAL, DECLARE, DEFINE, CHARACTER, SHIFT, ROTATE
 
 **NOTES**
 1. L'instruction STRING 'chaine' est un ajout personnel pour simplifier la gestion des chaînes de caractères. Elle écrit la chaîne avec le bit 7 du dernier caractère à 1. Exemple `STRING 'TEST'` génère `.BYT 'TES',$D4`.
