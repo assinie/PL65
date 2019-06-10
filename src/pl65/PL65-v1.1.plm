@@ -1310,14 +1310,11 @@ HB882:
 " Récupère l'adresse empilée (+1) avant l'adresse de retour et la met en Z0E-Z0F";
 " -----------------------------------------------------------------------------";
  HB916:
-	UNSTACK Z19;
-	UNSTACK Z1A;
-	UNSTACK Z0E;
-	UNSTACK Z0F;
+	UNSTACK WORD Z19;
+	UNSTACK WORD Z0E;
 	CALL HB85E;
 	"CLR .O;"; 'CLV';
-	STACK Z1A;
-	STACK Z19;
+	STACK WORD Z19;
 	RETURN;
 
 
