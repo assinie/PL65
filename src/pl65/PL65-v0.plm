@@ -3461,6 +3461,7 @@ HC265:
 		BEGIN;
 			CALL HCF93;
 
+			"La boucle suivante necessite WHILE .flag";
 			HC4DA:
 			"IF ^.O THEN"; 'BVS HC4E7';
 			BEGIN;
