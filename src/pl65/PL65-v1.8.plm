@@ -1078,6 +1078,10 @@ HB119:
 	Z00 = $20;
 	WHILE Z00 ^= 13
 	DO;
+		"La boucle suivante peut être ré-écrit avec une boucle";
+		"REPEAT... UNTIL dans cette version,";
+		"mais ne le sera que pour la v1.9.";
+		"Cf explications dans la v1.9";
 		HB792:
 		CALL HE993;
 		Z00 = .A;
@@ -6000,6 +6004,10 @@ IFF_Cmd:
 		CALL HCA4F;
 		IFF ^.O THEN IFF_Then;
 	END;
+
+	"IFF ^=";
+	CALL HEQUAL;
+	IFF ^.O THEN Not_Zero_asm;
 
 	"IFF BIT[]";
 	CALL HBIT;
