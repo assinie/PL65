@@ -4603,7 +4603,7 @@ HC265:
 	END;
 
 	HCB92: "HCB92:";
-	"IF ^.O THEN"; 'BVS *+12';
+	"IF ^.O THEN"; 'BVS *+13';
 	DO;
 		CALL HB57E;
 		CALL HCF93;
@@ -5590,6 +5590,10 @@ HC265:
 		CALL HCA4F;
 		"IFF ^.O THEN IFF_Then;"; 'BVC IFF_Then';
 	END;
+
+	"IFF ^=";
+	CALL HEQUAL;
+	"IFF ^.O THEN Not_Zero_asm;"; 'BVC Not_Zero_asm';
 
 	"IFF BIT[]";
 	CALL HBIT;

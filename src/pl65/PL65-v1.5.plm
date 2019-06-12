@@ -5982,6 +5982,10 @@ IFF_Cmd:
 		IFF ^.O THEN IFF_Then;
 	END;
 
+	"IFF ^=";
+	CALL HEQUAL;
+	IFF ^.O THEN Not_Zero_asm;
+
 	"IFF BIT[]";
 	CALL HBIT;
 	BRK;
