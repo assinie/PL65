@@ -5789,7 +5789,7 @@ CLR_Cmd:
 		END;
 
 		"CLR .Y;";
-		CALL HREGX;
+		CALL HREGY;
 		IF ^.O THEN
 		BEGIN;
 			GOTO HCF27;
@@ -6841,7 +6841,7 @@ RegReg_Patch:
 
  _REGYA:
 	CALL HB225; STRING 'LDY #<';
-	IFF ^.O THEN _OUT;
+	IFF ^.O THEN _REG_A;
 	RETURN;
 
  _OUT:
@@ -6990,7 +6990,7 @@ RegReg_Patch:
 	CALL HREGY;
 	IF ^.O THEN
 	BEGIN;
-		CALL HB225; STRING 'CMP ';
+		CALL HB225; STRING 'CPY ';
 
 	 TEST_RegsOper:
 		CALL HCA21;
@@ -7168,7 +7168,7 @@ To__A:
 	RETURN;
 
  HREGYX:
- 	CALL HB1C9; STRING '.XY';
+	CALL HB1C9; STRING '.YX';
 	RETURN;
 
 " -----------------------------------------------------------------------------";

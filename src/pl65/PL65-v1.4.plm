@@ -5441,7 +5441,7 @@ CLR_Cmd:
 		END;
 
 		"CLR .Y;";
-		CALL HREGX;
+		CALL HREGY;
 		IF ^.O THEN
 		BEGIN;
 			GOTO HCF27;
@@ -6080,7 +6080,7 @@ IF_BIT:
 	CALL HREGY;
 	IF ^.O THEN
 	BEGIN;
-		CALL HB225; STRING 'CMP ';
+		CALL HB225; STRING 'CPY ';
 
 	 TEST_RegsOper:
 		CALL HCA21;
@@ -6146,7 +6146,7 @@ IF_BIT:
 	RETURN;
 
  HREGYX:
- 	CALL HB1C9; STRING '.XY';
+	CALL HB1C9; STRING '.YX';
 	RETURN;
 
 " -----------------------------------------------------------------------------";

@@ -5729,7 +5729,7 @@ HC265:
 	CALL HREGY;
 	IF ^.O THEN
 	BEGIN;
-		CALL HB225; "STRING 'CMP ';"; DATA 'CMP', $A0;
+		CALL HB225; "STRING 'CPY ';"; DATA 'CPY', $A0;
 
 	 'TEST_RegsOper:';
 		CALL HCA21;
@@ -5795,7 +5795,7 @@ HC265:
 	RETURN;
 
  HREGYX:
- 	CALL HB1C9; DATA '.X', $D9;
+	CALL HB1C9; DATA '.Y', $D8;
 	RETURN;
 
 " -----------------------------------------------------------------------------";
