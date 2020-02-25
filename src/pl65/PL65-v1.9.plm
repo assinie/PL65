@@ -49,7 +49,7 @@ DEF H0019 = $0019;
 " -----------------------------------------------------------------------------";
 " Déclaration des différents tampons";
 " -----------------------------------------------------------------------------";
-DEF H0112 = $0112;
+DEF KEYF3 = $0112;
 DEF H014B = $014B;
 DEF H0158 = $0158;
 
@@ -68,9 +68,9 @@ DEF H0451 = $0451;
 " -----------------------------------------------------------------------------";
 " Déclaration de variables moniteur";
 " -----------------------------------------------------------------------------";
-DEF HA404 = $A404;
-DEF HA40E = $A40E;
-DEF HA42E = $A42E;
+DEF IRQV2 = $A404;
+DEF REGF  = $A40E;
+DEF NAME  = $A42E;
 
 " -----------------------------------------------------------------------------";
 "Déclaration des routines moniteur";
@@ -135,7 +135,7 @@ HB044:
 	CALL DU11;
 	CALL LL;
 
-	HA404 =## IRQV3;
+	IRQV2 =## IRQV3;
 	Z06 =## HB93C;
 
 	CALL HB909;
@@ -156,7 +156,7 @@ HB072:
 	Z1F = $00;
 	CLR .V;
 
-	HA404 =## HB6E1;
+	IRQV2 =## HB6E1;
 	Z18 = $20;
 
 	Z0A = $99;
@@ -243,7 +243,7 @@ HB119:
  HB125:
 	"2 passes";
 	CALL RCHEK;
-	HA404 = ##HB6E1;
+	IRQV2 = ##HB6E1;
 
 	IF Z08 = $00 THEN RETURN;
 
@@ -865,7 +865,7 @@ HB119:
 	Z01 = .Y;
 
  HB64E:
-	GOTO H0112;
+	GOTO KEYF3;
 
 " -----------------------------------------------------------------------------";
 "				Instruction '.TFILE '";
@@ -883,7 +883,7 @@ HB119:
 	DEC .X;
 	.A = ' ';
  HB668:
-	'STA HA42E,Y';
+	'STA NAME,Y';
 	CALL OUTDP1;
 	INC .Y;
 	IFF .Y ^= 5 THEN HB65D;
@@ -1175,8 +1175,8 @@ HB119:
 
  HB83B:
 	.X = 1;
-	HA40E = .X;
-	HA404 =## IRQV3;
+	REGF = .X;
+	IRQV2 =## IRQV3;
 	.A = .Y;
 	.X = .A;
 	GOTO HB92E;
@@ -3954,6 +3954,9 @@ HC265:
 		RETURN;
 	END;
 
+	"Le label suivant est utilisé par le RegReg_Patch, pour la syntaxe";
+	" .A .and|.or|.eor ...";
+	HC727:
 	CALL HCE8A;
 	IF ^.O THEN
 	BEGIN;
@@ -4750,7 +4753,7 @@ HC265:
 " -----------------------------------------------------------------------------";
 "			Branchement vers les extensions";
 " -----------------------------------------------------------------------------";
-	CALL EXTENSIONS;
+	"CALL EXTENSIONS;";
 
 	RETURN;
 
@@ -4913,6 +4916,14 @@ HC265:
 
  HCC67:
 	CALL HBF85; IF ^.O THEN RETURN;
+
+	CALL EXTENSIONS;
+	IF ^.O THEN
+	DO;
+		CALL HB1C9; STRING ';';
+		BRK;
+		RETURN;
+	END;
 
 	CALL HBE5D;
 	IF  ^.O THEN
@@ -5655,7 +5666,10 @@ HC265:
 " Externals";
 " -----------------------------------------------------------------------------";
  EXTENSIONS:
+"CALL HB21E; STRING '--[EXT]--';";
 	CALL CLR_Cmd;
+	IF .O THEN CALL SET_Cmd;
+	IF .O THEN CALL IFF_Cmd;
 	IF .O THEN CALL STRING_Cmd;
 	IF .O THEN CALL WAIT_Cmd;
 	IF .O THEN CALL PULSE_Cmd;
@@ -5760,9 +5774,10 @@ CLR_Cmd:
 			GOTO HCF27;
 		END;
 
-		RETURN;
+		"RETURN;";
+		CLR .O;
 	END;
-
+	RETURN;
 	"A faire suivre par 'SET .reg'";
 
 " -----------------------------------------------------------------------------";
@@ -5779,8 +5794,8 @@ CLR_Cmd:
 " STA FLAGS";
 
 SET_Cmd:
-	CALL HSET;
-	IF ^.O THEN
+	CALL HSET; IF .O THEN RETURN;
+	"IF ^.O THEN";
 	BEGIN;
 		CALL HBITS;
 		IF ^.O THEN
@@ -5807,13 +5822,13 @@ SET_Cmd:
 		END;
 
 		"Saut vers la suite";
-		IFF .O THEN SET_Flags;
+		"IFF .O THEN SET_Flags;";
 
 	END;
 
 	"Ascenseur vers IFF_Cmd, sinon le BVS au début de SET_Cmd est trop loin de 5 octets..";
 	"TODO: ré-ecrire SET_Cmd";
-	IFF .O THEN IFF_Cmd;
+	"IFF .O THEN IFF_Cmd;";
 
 	SET_Flags:
 	BEGIN;
@@ -5867,9 +5882,11 @@ SET_Cmd:
 			GOTO AREGFF;
 		END;
 
-		RETURN;
+		"RETURN;";
 	END;
 
+	CLR .O;
+	RETURN;
 	"A faire suivre par 'IFF xxx'";
 
 " -----------------------------------------------------------------------------";
@@ -5919,6 +5936,7 @@ IFF_Cmd:
 		BRK;
 		CALL HCFA0;
 		CALL HCEE2;
+		BRK;
 		IFF ^.O THEN IFF_Then;
 	END;
 
@@ -5993,15 +6011,19 @@ IFF_Cmd:
  "Place ici sinon les 'BVC IFF_Then' sont trop loin";
  IFF_Then:
 	CALL HB1C9; STRING 'THEN ';
-	BRK;
+	"BRK;";
+	IF ^.O THEN
+	DO;
+		CALL HGOTO;
+		CLR .O;
 
-	CALL HGOTO;
+		CALL HCEE9;
+		CALL HC441;
+		"BRK;";
+
+		IF ^.O THEN CALL HB119;
+	END;
 	CLR .O;
-
-	CALL HCEE9;
-	CALL HC441;
-	BRK;
-	CALL HB119;
 	RETURN;
 
 
@@ -6197,65 +6219,81 @@ WAIT_Cmd:
 	IF .O THEN RETURN;
 
 	CALL HB1C9; STRING 'ON ';
-	BRK;
-
-	"Z23 <=> R2 si ENTRY ,$20";
-	Z23 = 0;
-
-	CALL HB1C9; STRING 'ALL ';
-	IF ^.O THEN CALL HCA4F;
-
-	IF .O THEN
-	BEGIN;
-		CALL HB1C9; STRING 'ANY ';
-		CLR .O;
-		INC Z23;
-		CALL HCF98;
-	END;
-
-	CALL HBITS;
-	BRK;
-
-	CALL HCEBD;
-	CALL HCF17;
-	CALL HCCE1;
-	BRK;
-	CALL HCFA0;
-	CALL HCEE2;
-	CALL HB1C9; STRING ']';
-	BRK;
-
-	CALL HCLEAR;
+	"BRK;";
 	IF ^.O THEN
-	BEGIN;
-		DEC Z23;
-		IF .Z THEN
+	DO;
+		"Z23 <=> R2 si ENTRY ,$20";
+		Z23 = 0;
+
+		CALL HB1C9; STRING 'ALL ';
+		IF ^.O THEN CALL HCA4F;
+
+		IF .O THEN
 		BEGIN;
-			OUT_EOR:
-			CALL HOUT_EOR_FF;
+			CALL HB1C9; STRING 'ANY ';
+			CLR .O;
+			INC Z23;
+			CALL HCF98;
+		END;
+
+		CALL HBITS;
+		"BRK;";
+		IF ^.O THEN
+		DO;
+			CALL HCEBD;
+			CALL HCF17;
+			CALL HCCE1;
+			"BRK;";
+			IF ^.O THEN
+			DO;
+				CALL HCFA0;
+				CALL HCEE2;
+				CALL HB1C9; STRING ']';
+				"BRK;";
+				IF ^.O THEN
+				DO;
+					CALL HCLEAR;
+					IF ^.O THEN
+					BEGIN;
+						DEC Z23;
+						IF .Z THEN
+						BEGIN;
+							OUT_EOR:
+							CALL HOUT_EOR_FF;
+						END;
+					END;
+
+					IF .O THEN
+					BEGIN;
+						CALL HSET;
+						CLR .O;
+						DEC Z23;
+						IFF ^.Z THEN OUT_EOR;
+					END;
+
+					CALL HB1C9; STRING 'OF ';
+					"BRK;";
+					IF ^.O THEN
+					DO;
+						CALL HC72C;
+						CALL HC441;
+						"BRK;";
+						IF ^.O THEN
+						DO;
+							CALL HB119;
+
+							CALL HCEE9;
+							CALL HCEAF;
+							CALL HCFA0;
+							CALL HCEE2;
+						END;
+					END;
+				END;
+			END;
 		END;
 	END;
 
-	IF .O THEN
-	BEGIN;
-		CALL HSET;
-		CLR .O;
-		DEC Z23;
-		IFF ^.Z THEN OUT_EOR;
-	END;
-
-	CALL HB1C9; STRING 'OF ';
-	BRK;
-	CALL HC72C;
-	CALL HC441;
-	BRK;
-	CALL HB119;
-
-	CALL HCEE9;
-	CALL HCEAF;
-	CALL HCFA0;
-	CALL HCEE2;
-
+	CLR .O;
 	RETURN;
 
 " -----------------------------------------------------------------------------";
@@ -6276,6 +6314,7 @@ PULSE_Cmd:
 	CALL HB1C9; STRING 'PULSE ';
 	IF .O THEN RETURN;
 
+	Z04=$00;
 	CALL HBITS;
 	BRK;
 
@@ -6463,6 +6502,7 @@ IF_BIT:
 	CALL HBITS;
 	IF ^.O THEN
 	DO;
+		Z04 = $00;
 		CALL HCCE1;
 		BRK;
 		CALL HCF17;
@@ -6500,6 +6540,8 @@ IF_BIT:
 "			'.regs <- id' ";
 "			'.regs =## id' ";
 "			'.A = (@id[.reg]|@val[.reg]|id[.reg])? (expr)?'  ";
+"			'.X = id[.Y]' ";
+"			'.Y = id[.X]' ";
 " -----------------------------------------------------------------------------";
 
 " PY65: c.onecmd('assemble b9fb jmp %RegReg_Patch%') ";
@@ -6522,7 +6564,7 @@ RegReg_Patch:
 			";	JSR HCEC4		; Set Z04 := $FF";
 			" Token '1;'?";
 			CALL HCE9A;
-			IFF .O THEN Erreur;
+			IFF .O THEN XYErreur;
 			GOTO OUT_INX;
 		END;
 
@@ -6533,7 +6575,7 @@ RegReg_Patch:
 				";	JSR HCEC4		; Set Z04 := $FF";
 				" Token '1;'?";
 				CALL HCE9A;
-				IFF .O THEN Erreur;
+				IFF .O THEN XYErreur;
 				GOTO OUT_DEX;
 
 			END;
@@ -6551,7 +6593,7 @@ RegReg_Patch:
 				"; Ou";
 				";	CALL HB21E		; OUT 'TAX'";
 				";	STRING 'TAX';";
-				IFF ^.O THEN  reg_ok;
+				IFF ^.O THEN  XYreg_ok;
 			END;
 
 		"TSX_";
@@ -6564,14 +6606,33 @@ RegReg_Patch:
 				"; Ou";
 				";	CALL HB21E;";
 				";	STRING 'TSX';";
-				IFF ^.O THEN reg_ok;
+				IFF ^.O THEN XYreg_ok;
 			END;
 
 		"X_value";
 			".X = val?";
 			"OUT2 'LDX ';";
 			CALL OUT_LDX;
-			IFF ^.O THEN reg_value;
+
+			"Identifiant uniquement";
+			"Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+			CALL HC441;
+
+			IFF .O THEN reg_value;
+
+			" .X = id[.Y]?";
+			CALL HB1C9; STRING '[';
+			IFF .O THEN reg_ok;
+
+			CALL HREGY;
+	XYErreur:
+			IFF .O THEN Erreur;
+			CALL HB225; STRING ',Y';
+	XYCloseBracket:
+			CALL HB1C9; STRING ']';
+			BRK;
+	XYreg_ok:
+			IFF ^.O THEN reg_ok;
 
 	END;
 
@@ -6617,8 +6678,22 @@ RegReg_Patch:
 		"Y_value";
 			".Y = val?";
 			CALL OUT_LDY;
-			IFF ^.O THEN reg_value;
 
+			"Identifiant uniquement";
+			"Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
+			CALL HC441;
+
+			IFF .O THEN reg_value;
+
+			" .Y = id[.X]?";
+			CALL HB1C9; STRING '[';
+			IFF .O THEN reg_ok;
+
+			CALL HREGX;
+			IFF .O THEN Erreur;
+
+			CALL HB225; STRING ',X';
+			IFF ^.O THEN XYCloseBracket;
 	END;
 
 ".S=";
@@ -6688,7 +6763,7 @@ RegReg_Patch:
 				"Boucle de compilation d'une expression (extrait de HC527)";
 				"TODO: Ajouter un label dans HC527 et y faire un saut?";
 				"A supprimer si on ne veut que '.A + id|val'";
-				"Attension, cette boucle ajoutera le CLC/SEC pour";
+				"Attention, cette boucle ajoutera le CLC/SEC pour";
 				"les additions/soustractions suivantes";
 				"[--";
 				WHILE ^.O
@@ -6723,6 +6798,9 @@ RegReg_Patch:
 				CALL HB225; STRING 'SBC ';
 				IFF ^.O THEN regA_add_sub;
 			END;
+
+		".A .and|.or|.eor ...";
+		CALL HC727; IFF ^.O THEN regA_add_sub;
 
 		CALL HEQUAL;
 		BRK;
