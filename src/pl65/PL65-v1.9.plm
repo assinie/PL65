@@ -2922,12 +2922,27 @@ HBC44:
 
 
  HC11C:
- 	"[--- Modification pour id[.y] à gauche de l'affectation";
+	"[--- Modification pour id[.x] à gauche de l'affectation";
  	"Cette routine est appelée par HC112 qui sert pour";
  	"l'affection et l'instruction 'IF'";
 	"CALL HC130;";
- 	CALL HREGY; IF .O THEN CALL HC130;
- 	"--]";
+	CALL HREGX;
+
+	IF ^.O THEN
+	DO;
+		CALL HB57E;
+		CALL HCF93;
+		CALL HB468; STRING ',X';
+		CALL HCFA0;
+		RETURN;
+	END;
+	"--]";
+
+	"[--- Modification pour id[.y] à gauche de l'affectation";
+	"Cette routine est appelée par HC112 qui sert pour";
+	"l'affection et l'instruction 'IF'";
+	CALL HREGY; IF .O THEN CALL HC130;
+	"--]";
 
 	IF ^.O THEN
 	DO;
