@@ -6553,6 +6553,7 @@ IF_BIT:
 "			Instruction '.reg = .reg|val' ";
 "			'.A = @id[.reg]|@val[.reg]|id[.reg]' (patch) ";
 "			'.regs <- id' ";
+"			'.regs <- id[.reg]' (reg ne doit pas être dans regs)";
 "			'.regs =## id' ";
 "			'.A = (@id[.reg]|@val[.reg]|id[.reg])? (expr)?'  ";
 "			'.X = id[.Y]' ";
@@ -7162,6 +7163,9 @@ RegReg_Patch:
 	RETURN;
 
 " -----------------------------------------------------------------------------";
+"			'.regs <- id' ";
+"			'.regs <- id[.reg]' (reg ne doit pas être dans regs)";
+"			'.regs =## id' ";
 " -----------------------------------------------------------------------------";
 To_Regs:
 To_AY:
@@ -7179,12 +7183,35 @@ To_AY:
 To__Y:
 		CALL HC441;
 		BRK;
+
+		CALL HCFA5;			" Ajoute le contenu de H0200 dans H02A1";
+
+		" .ay <- id[.x]?";
+		CALL HB1C9; STRING '[';
+		IF ^.O THEN
+		BEGIN;
+
+			CALL HREGX;
+			BRK;
+
+			CALL HB21E; STRING ',X';
+
+			CALL OUT_LDY;			" Ajoute 'LDY ' dans le tampon H0400";
+
+To___CloseX:
+			CALL HCEE9;			" Ajoute POP(H02A1) au tampon H0400";
+			CALL HB21E; STRING '+1,X';	" Ajoute '+1,X' dans H0400 et l'&ffiche";
+
+			CALL HB1C9; STRING ']';
+			BRK;
+			RETURN;
+		END;
+
+To__Y_:
 		CALL HB119;
 		CALL OUT_LDY;
 
 To___:
-		CALL HCF93;
-		CALL HCFA0;
 		CALL HCEDB;
 		RETURN;
 	END;
@@ -7199,7 +7226,10 @@ To___:
 		CALL HSTOREW;
 		BRK;
 		CALL OUT_LDX;
-		IFF ^.O THEN To__Y;
+		CALL HC441;
+		BRK;
+		CALL HCFA5;
+		IFF ^.O THEN To__Y_;
 	END;
 
 
@@ -7217,6 +7247,31 @@ To___:
 To__X:
 		CALL HC441;
 		BRK;
+
+		CALL HCFA5;			" Ajoute le contenu de H0200 dans H02A1";
+
+		" .ax <- id[.y]?";
+		CALL HB1C9; STRING '[';
+		IF ^.O THEN
+		BEGIN;
+
+			CALL HREGY;
+			BRK;
+
+			CALL HB21E; STRING ',Y';
+
+			CALL OUT_LDX;			" Ajoute 'LDX ' dans le tampon H0400";
+
+To___CloseY:
+			CALL HCEE9;			" Ajoute POP(H02A1) au tampon H0400";
+			CALL HB21E; STRING '+1,Y';	" Ajoute '+1,Y' dans H0400 et l'&ffiche";
+
+			CALL HB1C9; STRING ']';
+			BRK;
+			RETURN;
+		END;
+
+To__X_:
 		CALL HB119;
 		CALL OUT_LDX;
 
@@ -7235,7 +7290,10 @@ To____:
 		CALL HSTOREW;
 		BRK;
 		CALL OUT_LDY;
-		IFF ^.O THEN To__X;
+		CALL HC441;
+		BRK;
+		CALL HCFA5;
+		IFF ^.O THEN To__X_;
 	END;
 
 "To_XA";
@@ -7252,6 +7310,31 @@ To____:
 To__A:
 		CALL HC441;
 		BRK;
+
+		CALL HCFA5;
+
+		" .xa <- id[.y]";
+		CALL HB1C9; STRING '[';
+		IF ^.O THEN
+		BEGIN;
+
+			CALL HREGY;
+			BRK;
+
+			CALL HB21E; STRING ',Y';
+
+			CALL HCF17;			" Ajoute 'LDA ' dans le tampon H0400";
+
+			IFF ^.O THEN To___CloseY;
+			"CALL HCEE9;";			" Ajoute POP(H02A1) au tampon H0400";
+			"CALL HB21E; STRING '+1,Y';";	" Ajoute '+1,Y' dans H0400 et l'&ffiche";
+
+			"CALL HB1C9; STRING ']';";
+			"BRK;";
+			"RETURN;";
+		END;
+
+To__A_:
 		CALL HB119;
 		CALL HCF17;
 		IFF ^.O THEN To____;
@@ -7267,7 +7350,26 @@ To__A:
 		CALL HSTOREW;
 		BRK;
 		CALL OUT_LDY;
-		IFF ^.O THEN To__A;
+		CALL HC441;
+		BRK;
+		CALL HCFA5;
+
+		" .ya <- id[.x]?";
+		CALL HB1C9; STRING '[';
+		IF ^.O THEN
+		BEGIN;
+
+			CALL HREGX;
+			BRK;
+
+			CALL HB21E; STRING ',X';
+
+			CALL HCF17;			" Ajoute 'LDA ' dans le tampon H0400";
+
+			GOTO To___CloseX;
+		END;
+
+		IFF .O THEN To__A_;
 	END;
 
 "To___End";
