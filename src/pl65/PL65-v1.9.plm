@@ -6331,9 +6331,20 @@ PULSE_Cmd:
 	CALL HB1C9; STRING 'PULSE ';
 	IF .O THEN RETURN;
 
+	" En cas d'erreur, on relance l'analyse au début du tampon d'entrée";
+	" Ce qui permet de traiter PULSE comme une variable: PULSE +1;";
 	Z04=$00;
+
 	CALL HBITS;
 	BRK;
+
+	" En cas d'erreur, on poursuit l'analyse à partir de l'erreur";
+	" (Comportement par défaut).
+	" Pb: PULSE BIT[n] A+1; -> LDA n / INC A et aucune erreur remontée";
+	" Mais: PULSE BIT[n] od n;";
+	"       LDA n";
+	"       ??????????????  ERROR";
+	Z04 =$FF;
 
 	CALL HCCE1;
 	BRK;
@@ -6427,14 +6438,21 @@ REPEAT_Cmd:
 	BRK;
 
 	CALL HB1C9; STRING 'UNTIL ';
-	BRK;
+	IF ^.O THEN
+	BEGIN;
+		CALL TEST_Flags;
+		IF ^.O THEN
+		BEGIN;
+			CALL HCEE9;
+			CALL HCEE2;
+		END;
+	END;
 
-	CALL TEST_Flags;
-	BRK;
-
-	CALL HCEE9;
-	CALL HCEE2;
-
+	" On indique que l'instruction REPEAT;... a été trouvée et traitée";
+	" et ce, même si on n'a pas trouvé UNTIL ou la condition de fin";
+	" ainsi, une erreur sera remontée (la prochaine instruction doit être";
+	" ';' ce qui ne sera pas le cas en cas d'erreur de syntaxe)";
+	CLR .O;
 	RETURN;
 
 " -----------------------------------------------------------------------------";
