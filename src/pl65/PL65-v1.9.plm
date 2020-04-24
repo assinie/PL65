@@ -3755,8 +3755,10 @@ HC265:
 		IF ^.O THEN
 		BEGIN;
 			OUT_INA:
-			CALL HB21E; STRING 'SEC';
-			CALL HB21E; STRING 'ADC #0';
+			'.ifdef INA_WITH_CLC';
+			CALL HB21E; STRING 'CLC';
+			'.endif';
+			CALL HB21E; STRING 'ADC #1';
 			RETURN;
 		END;
 
@@ -3802,8 +3804,10 @@ HC265:
 		IF ^.O THEN
 		BEGIN;
 			OUT_DEA:
-			CALL HB21E; STRING 'CLC';
-			CALL HB21E; STRING 'SBC #0';
+			'.ifdef DEA_WITH_SEC';
+			CALL HB21E; STRING 'SEC';
+			'.endif';
+			CALL HB21E; STRING 'SBC #1';
 			RETURN;
 		END;
 
@@ -6339,7 +6343,7 @@ PULSE_Cmd:
 	BRK;
 
 	" En cas d'erreur, on poursuit l'analyse à partir de l'erreur";
-	" (Comportement par défaut).
+	" (Comportement par défaut).";
 	" Pb: PULSE BIT[n] A+1; -> LDA n / INC A et aucune erreur remontée";
 	" Mais: PULSE BIT[n] od n;";
 	"       LDA n";
