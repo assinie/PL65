@@ -1200,7 +1200,7 @@ HB882:
 	"Les 2 instructions suivantes sont équivalentes";
 	" a: .A = &Z0E qui n'est pas encore pris en compte...";
 	.X = 0;
-	.A = @Z0E[.X];
+	.A = &Z0E[.X];
 
 	IF - THEN INC Z1E;
 	'AND #$7F';
@@ -1309,7 +1309,7 @@ HB882:
 	.Y = 0;
 
  HB90B:
-	.A = @Z06[.Y];
+	.A = &Z06[.Y];
 	IF ^= THEN
 	BEGIN;
 		CALL HE97A;
@@ -6461,7 +6461,7 @@ IF_BIT:
 
 " -----------------------------------------------------------------------------";
 "			Instruction '.reg = .reg|val' ";
-"			'.A = @id[.reg]|@val[.reg]|id[.reg]' (patch) ";
+"			'.A = &id[.reg]|&val[.reg]|id[.reg]' (patch) ";
 "			'.regs <- id' ";
 "			'.regs =## id' ";
 " -----------------------------------------------------------------------------";
@@ -6647,7 +6647,7 @@ RegReg_Patch:
 		"A_Indirect";
 			"OUT2 'LDA '";
 			CALL HCF17;
-			CALL HB1C9; STRING '@';
+			CALL HB1C9; STRING '&';
 			IF ^.O THEN
 			BEGIN;
 				"OUT2 '('";
@@ -6655,7 +6655,7 @@ RegReg_Patch:
 				"Identifiant uniquement";
 				"	CALL HC441; Identifiant? (si oui le copie dans le tampon H0200 + ajout dans le tampon H0400)";
 				" Autorise un identifiant ou une valeur numerique";
-				" /!\ On peut saisir une valeur négative: .A = @-45[.Y] !!!";
+				" /!\ On peut saisir une valeur négative: .A = &-45[.Y] !!!";
 				"Identifiant ou valeur numérique (hexa,binaire, décimale, résultat dans le tampon H0400)?";
 				CALL HC46C;
 
@@ -6688,7 +6688,7 @@ RegReg_Patch:
 			" A voir, si on active ce qui suit, on ne peut pas avoir: .A = $45 -> LDA #$45";
 
 			" Autorise un identifiant ou une valeur numerique";
-			" /!\ On peut saisir une valeur négative: .A = @-45[.Y] !!!";
+			" /!\ On peut saisir une valeur négative: .A = &-45[.Y] !!!";
 			"	JSR HC46C; Identifiant ou valeur numérique (hexa,binaire, décimale, résultat dans le tampon H0400)?";
 
 			" Avec controle des valeurs numeriques";

@@ -1200,7 +1200,7 @@ HB882:
 	"Les 2 instructions suivantes sont équivalentes";
 	" a: .A = &Z0E qui n'est pas encore pris en compte...";
 	".X = 0;"; 'LDX #$00';
-	".A = @Z0E[.X];"; 'LDA (Z0E,X)';
+	".A = &Z0E[.X];"; 'LDA (Z0E,X)';
 
 	IF - THEN INC Z1E;
 	'AND #$7F';
@@ -1309,7 +1309,7 @@ HB882:
 	".Y = 0;"; 'LDY #$00';
 
  HB90B:
-	".A = @Z06[.Y]"; 'LDA (Z06),Y';
+	".A = &Z06[.Y]"; 'LDA (Z06),Y';
 	IF ^= THEN
 	BEGIN;
 		CALL HE97A;
